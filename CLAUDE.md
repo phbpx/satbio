@@ -1,6 +1,6 @@
 # satbio
 
-Projeto de mestrado em Sensoriamento Remoto (INPE). Avalia quanto séries temporais Sentinel-2/Landsat do Brazil Data Cube acrescentam à predição de indicadores da comunidade de aves, medidos por monitoramento acústico passivo, em sistemas cabruca no sul da Bahia.
+Projeto de pesquisa independente e voluntário, em ciência aberta, sem vínculo com programa de pós-graduação. Avalia quanto séries temporais Sentinel-2/Landsat do Brazil Data Cube acrescentam à predição de indicadores da comunidade de aves, medidos por monitoramento acústico passivo, em sistemas cabruca no sul da Bahia.
 
 - Pré-projeto: `docs/pre-projeto-bioacustica-inpe.pdf` (o `.docx` tem o mesmo conteúdo).
 - Roadmap, requisitos e portões de decisão: `docs/PRD.md`. Ao concluir uma entrega ou tomar uma decisão de portão, atualize o PRD.
@@ -9,7 +9,7 @@ O projeto está no início: ainda não há código nem dados. Pergunte antes de 
 
 ## Stack
 
-Python para consulta STAC, rasters, processamento de áudio e modelos; R apenas quando a estatística ecológica pedir. Sem plataforma web ou infraestrutura distribuída — o objetivo é um fluxo reproduzível para a dissertação, não um produto.
+Python para consulta STAC, rasters, processamento de áudio e modelos; R apenas quando a estatística ecológica pedir. Sem plataforma web ou infraestrutura distribuída — o objetivo é um fluxo reproduzível que sustente um relatório técnico e um artigo, não um produto.
 
 ## Regras metodológicas que o código precisa respeitar
 

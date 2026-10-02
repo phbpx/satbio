@@ -1,6 +1,6 @@
 # satbio
 
-**Sensoriamento remoto e bioacústica em cabruca** — projeto de mestrado em Sensoriamento Remoto (INPE).
+**Sensoriamento remoto e bioacústica em cabruca** — projeto de pesquisa independente e voluntário, em ciência aberta, usando dados públicos do INPE.
 
 ## Sobre
 

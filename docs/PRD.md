@@ -1,8 +1,8 @@
 # PRD — satbio
 
 **Projeto:** Predição de indicadores da comunidade de aves em sistemas cabruca por meio de séries temporais de sensoriamento remoto e monitoramento acústico passivo
-**Tipo:** Mestrado em Sensoriamento Remoto (INPE) · duração prevista de 24 meses
-**Fonte:** `docs/pre-projeto-bioacustica-inpe.pdf` (pré-projeto de 2 de outubro de 2026)
+**Tipo:** Pesquisa independente e voluntária, em ciência aberta · cronograma de referência de 24 meses
+**Fonte:** `docs/pre-projeto-bioacustica-inpe.pdf` (pré-projeto de 2 de outubro de 2026, escrito originalmente como proposta de mestrado; este PRD o adapta para um projeto voluntário)
 **Status:** pré-projeto; nenhum experimento realizado ainda
 
 ---
@@ -141,7 +141,7 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 | 3 | Consulta STAC para locais elegíveis; série curta extraída com máscara de qualidade |
 | 4 | Inventário de dados, exemplo reprodutível da integração e **decisão sobre a base final** |
 
-### Fases do mestrado
+### Fases do projeto
 
 | Fase | Meses | Entregas | Portão de decisão |
 |---|---|---|---|
@@ -150,7 +150,7 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 | 3. Coleta | 7–12 | Campanhas sazonais ou consolidação de dados existentes; QC e documentação | **G3:** dados suficientes para as duas campanhas |
 | 4. Indicadores | 13–16 | Anotações finais, indicadores ecológicos, séries temporais extraídas | **G4:** incerteza da anotação aceitável para os indicadores |
 | 5. Modelagem | 17–20 | Modelos M0–M3, validação espacial, sensibilidade | **G5:** resultados avaliados como confirmatórios ou exploratórios |
-| 6. Escrita | 21–24 | Dissertação, artigo, publicação de código e metadados permitidos | Defesa |
+| 6. Escrita | 21–24 | Relatório técnico, artigo, publicação de código e metadados permitidos | Publicação |
 
 ### Caminhos alternativos (decididos em G1)
 
@@ -164,7 +164,7 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 - Erro do reconhecedor estimado (precisão e sensibilidade, incluindo falsos negativos).
 - Ganho de M1, M2 e M3 sobre M0 quantificado fora da amostra, com incerteza.
 - Limites de extrapolação documentados; mapas apenas dentro do domínio de treinamento, com incerteza.
-- Dissertação defendida e manuscrito submetido.
+- Relatório técnico público e manuscrito submetido.
 
 ## 9. Riscos
 
@@ -176,16 +176,16 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 | Erro do reconhecedor | Indicadores enviesados | Validação por especialista, limiares calibrados fora do teste |
 | Confusão entre manejo, distância da mata e equipamento | Associações espúrias | Seleção balanceada de áreas, equipamento padronizado |
 | Licenças e restrições das bases | Limita publicação | Registrar licença por versão; publicar só o permitido |
-| Falta de especialista em aves | Validação taxonômica comprometida | Coorientação ou parceria em ecologia de aves |
+| Falta de especialista em aves | Validação taxonômica comprometida | Colaboração voluntária com pesquisador(a) ou grupo de ecologia de aves |
 
 ## 10. Questões em aberto
 
-- Orientador(a) e coorientação em ecologia de aves.
+- Colaboradores: apoio em sensoriamento remoto e em ecologia de aves (amostragem e validação taxonômica).
 - Municípios e propriedades com acesso confirmado.
 - Quantos sítios brasileiros adequados existem no WABAD; licença efetiva da versão usada.
 - Mapa de cobertura validado para as métricas de paisagem (externo ou classificação própria).
 - Orçamento (equipamentos, deslocamento, horas de anotação, armazenamento) — não há preços cotados.
-- Exigências vigentes do programa e do edital do INPE.
+- Fontes de apoio para a coleta em campo (equipamentos emprestados, parcerias, pequenos financiamentos).
 
 ## 11. Referências
 
