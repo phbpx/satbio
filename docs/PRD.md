@@ -109,7 +109,7 @@ Tabelas com chaves explícitas e dicionário de dados: `areas`, `pontos`, `campa
 
 - Registrar versão das coleções, data de acesso, IDs de itens STAC, parâmetros de qualidade e decisões de anotação.
 - Janelas ópticas terminam na véspera da primeira gravação de cada sítio × campanha (sem informação futura). A véspera, e não o próprio dia, absorve o fuso desconhecido dos relógios dos gravadores; o fim da campanha nunca é usado como corte. Decidido em 2026-10-03.
-- Pixel óptico válido: SCL 4, 5 ou 6, todas as bandas presentes, PROVENANCE dentro do período da composição e B02 ≤ 0,10 (teste de névoa, porque o SCL classifica névoa fina como solo exposto). A regra só com SCL fica como variante de sensibilidade. Decidido em 2026-10-03 (`docs/piloto/semana-3.md`).
+- Pixel óptico válido: SCL 4, 5 ou 6 na **cena Sentinel-2 de origem** (data dada pela PROVENANCE), todas as bandas presentes, PROVENANCE dentro do período da composição e B02 ≤ 0,10. O SCL do cubo divergiu da cena de origem em 6% dos pixels no piloto e deixa passar nuvem e sombra; a regra só com o SCL do cubo fica como variante de sensibilidade. Decidido em 2026-10-03 (`docs/desenho-analitico.md`, decisão D; evidência em `docs/piloto/semana-3.md`).
 - Registrar datas de origem e número de observações válidas da composição.
 - Normalização, seleção de variáveis e construção da referência ecológica apenas dentro do treino.
 - Áreas e campanhas da mesma propriedade sempre no mesmo grupo de validação.

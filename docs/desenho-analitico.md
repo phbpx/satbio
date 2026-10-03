@@ -1,6 +1,6 @@
 # Desenho analítico — satbio
 
-**Status:** rascunho, 2026-10-03. Responde à revisão externa do projeto feita após o piloto técnico. Substitui a seção 6.4 do PRD quando aprovado. As decisões marcadas **[aberta]** precisam ser fechadas antes da coleta definitiva; depois disso este documento é congelado (versão e data registradas) e qualquer mudança passa a ser registrada como desvio.
+**Status:** rascunho, 2026-10-03; decisões A, D e E fechadas em 2026-10-03, B e C abertas. Responde à revisão externa do projeto feita após o piloto técnico. Substitui a seção 6.4 do PRD quando aprovado. As decisões marcadas **[aberta]** precisam ser fechadas antes da coleta definitiva; depois disso este documento é congelado (versão e data registradas) e qualquer mudança passa a ser registrada como desvio.
 
 Este documento existe porque o PRD descreve bem o que medir, mas não fixa a ligação entre o que será gravado, o indicador ecológico calculado e o que o modelo prevê. Sem essa ligação, um modelo pode ter bom desempenho respondendo a uma pergunta diferente da proposta.
 
@@ -8,14 +8,14 @@ Este documento existe porque o PRD descreve bem o que medir, mas não fixa a lig
 
 **Grupo efetivamente estudado.** Aves que vocalizam nas três horas após o amanhecer, detectáveis por gravação passiva e identificáveis pelo reconhecedor validado. Espécies noturnas, pouco vocais ou ativas em outros horários ficam sub-representadas, e os resultados se restringem a esse grupo.
 
-**Decisão A — o que a resposta representa [aberta].**
+**Decisão A — o que a resposta representa [fechada em 2026-10-03: A1].**
 
 | Opção | O que se prevê | Exige | Risco |
 |---|---|---|---|
 | **A1. Comunidade detectada sob protocolo padronizado** (recomendada) | A lista de espécies detectadas com esforço, horário, equipamento e reconhecedor fixos | Protocolo idêntico em todas as propriedades; covariáveis de detecção registradas (ruído, chuva, vento, equipamento) | Diferenças de detectabilidade entre ambientes entram na resposta; precisam ser discutidas, não corrigidas |
 | A2. Ocorrência ou uso do habitat | Probabilidade de ocupação por espécie, corrigida por detecção imperfeita (e, idealmente, por falsos positivos) | Repetições suficientes por espécie; modelo de observação; mais pressupostos | Com poucas propriedades, só espécies comuns têm dados; se a ocupação usar os preditores ópticos, a regressão sobre ela não é validação independente do satélite |
 
-Recomendo A1 pela escala do projeto. A afirmação do estudo passa a ser "o satélite prevê a comunidade detectada sob este protocolo", não "a comunidade presente".
+Escolhida A1, pela escala do projeto. A afirmação do estudo é "o satélite prevê a comunidade detectada sob este protocolo", não "a comunidade presente".
 
 ## 2. Resposta principal
 
@@ -58,7 +58,7 @@ H1 é uma hipótese de **associação**; H2 e H3 são hipóteses de **ganho de p
 
 O controle M2b separa dois benefícios possíveis da série: uma estimativa mais estável do estado da vegetação (M2b × M2) e informação sobre dinâmica (M3 × M2b). Só o segundo sustenta a afirmação de que a dimensão temporal acrescenta informação.
 
-**Métrica principal:** erro absoluto médio (MAE) da resposta nas propriedades retidas, com intervalo por reamostragem de propriedades. **Decisão E — ganho mínimo relevante [aberta]:** proposta de redução de 10% do MAE de M2, fixada antes da coleta. Um intervalo que inclua zero e o ganho mínimo é inconclusivo, não evidência de ausência de benefício.
+**Métrica principal:** erro absoluto médio (MAE) da resposta nas propriedades retidas, com intervalo por reamostragem de propriedades. **Decisão E — ganho mínimo relevante [fechada em 2026-10-03]:** em cada comparação, o ganho é relevante se o modelo maior reduzir o MAE em pelo menos 10% do MAE do modelo de base daquela comparação (para H2, 10% do MAE de M2b). Um intervalo que inclua zero e o ganho mínimo é inconclusivo, não evidência de ausência de benefício.
 
 ## 5. Descritores (limitados e ligados a hipóteses)
 
@@ -78,7 +78,7 @@ Um preditor útil pode estar funcionando como substituto de outro fator; desempe
 
 ## 6. Regras ópticas
 
-- **Validade do pixel — Decisão D [aberta].** Proposta: o pixel vale se o SCL da **cena de origem** (dada pela PROVENANCE) for 4, 5 ou 6 e se B02 ≤ 0,10. A conferência do piloto mostrou que o SCL do cubo diverge da cena de origem em 6% dos pixels aceitos e que o teste B02 pega nuvens, mas não sombras (`docs/piloto/semana-3.md`). A regra só com o SCL do cubo fica como análise de sensibilidade.
+- **Validade do pixel — Decisão D [fechada em 2026-10-03].** O pixel vale se o SCL da **cena de origem** (a cena Sentinel-2 L2A da data dada pela PROVENANCE) for 4, 5 ou 6 e se B02 ≤ 0,10. Se a cena de origem não for encontrada, o pixel é inválido. A conferência do piloto mostrou que o SCL do cubo diverge da cena de origem em 6% dos pixels aceitos e que o teste B02 pega nuvens, mas não sombras (`docs/piloto/semana-3.md`). A regra só com o SCL do cubo fica como análise de sensibilidade.
 - **Cobertura mínima.** A série só entra se tiver pelo menos uma composição válida em cada trimestre da janela e pelo menos 10 composições válidas no total; caso contrário, a propriedade × campanha fica sem descritores temporais e isso é reportado.
 - **Robustez a lacunas.** Antes da análise confirmatória, séries bem observadas são reduzidas artificialmente (retirando composições ao acaso e por trimestre) para medir quanto os descritores variam com a perda de imagens. Se a amplitude variar mais que a diferença entre propriedades, ela sai do conjunto principal.
 - **Escala espacial do pixel.** Mediana da janela 3×3 em volta do ponto de cada gravador (coordenada por gravador, não por propriedade).
@@ -108,11 +108,11 @@ Um preditor útil pode estar funcionando como substituto de outro fator; desempe
 
 | | Decisão | Depende de | Recomendação |
 |---|---|---|---|
-| A | Comunidade detectada ou ocupação | Escala e esforço possíveis | A1, comunidade detectada |
+| A | Comunidade detectada ou ocupação | Escala e esforço possíveis | **Fechada:** A1, comunidade detectada |
 | B | Referência independente ou construída no treino | Acesso a matas com o mesmo protocolo | B1, se a parceria permitir |
 | C | Número de cabrucas e de matas | Parceria (UESC), recursos, simulação | Fechar após a simulação |
-| D | Regra de validade do pixel | Custo da consulta à cena de origem | SCL da cena de origem + B02 ≤ 0,10 |
-| E | Ganho mínimo relevante | Julgamento ecológico | 10% do MAE de M2 |
+| D | Regra de validade do pixel | Custo da consulta à cena de origem | **Fechada:** SCL da cena de origem + B02 ≤ 0,10 |
+| E | Ganho mínimo relevante | Julgamento ecológico | **Fechada:** 10% do MAE do modelo de base de cada comparação |
 
 ## Referências desta seção
 

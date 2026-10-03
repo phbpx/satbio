@@ -14,6 +14,7 @@ dados —, então também carrega a resolução de 20 m no NIR.
 
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -21,7 +22,6 @@ from datetime import date, datetime, timedelta
 from typing import Callable
 
 import numpy as np
-
 import pystac
 import rasterio
 from pystac_client import Client
@@ -30,6 +30,8 @@ from rasterio.windows import Window
 
 CATALOGO = "https://data.inpe.br/bdc/stac/v1"
 COLECAO = "S2-16D-2"
+# Cenas Sentinel-2 L2A individuais, de onde vêm os pixels do cubo (PRD 6.3, decisão D).
+COLECAO_ORIGEM = "S2_L2A-1"
 USER_AGENT = "satbio/0.1 (+https://github.com/phbpx/satbio)"
 
 BANDAS_ESPECTRAIS = ["B02", "B04", "B08", "B8A", "B11"]
@@ -60,16 +62,32 @@ GDAL_ENV = {
 
 @dataclass(frozen=True)
 class Posicao:
-    """Onde o ponto cai num raster: coordenadas no CRS do cubo, pixel e distância à borda."""
+    """Onde o ponto cai num raster do cubo.
+
+    `x`, `y` são o ponto no CRS do cubo; `x_centro`, `y_centro` o centro do
+    pixel que o contém; `res` o tamanho do pixel. Com eles se calcula o centro
+    de cada pixel da janela, usado para conferir a cena de origem.
+    """
     x: float
     y: float
     linha: int
     coluna: int
     dist_borda_px: int
+    crs: str = ""
+    x_centro: float = 0.0
+    y_centro: float = 0.0
+    res: float = 10.0
+
+    def centros_da_janela(self, raio_px: int = RAIO_JANELA_PX) -> list[list[tuple[float, float]]]:
+        """Centros (x, y), no CRS do cubo, dos pixels da janela, linha a linha."""
+        return [[(self.x_centro + j * self.res, self.y_centro - i * self.res) for j in range(-raio_px, raio_px + 1)]
+                for i in range(-raio_px, raio_px + 1)]
 
 
 Leitor = Callable[[str, float, float], np.ndarray]
 Localizador = Callable[[str, float, float], Posicao]
+# (datas por pixel, posição, lon, lat, B04 do cubo por pixel) -> conferência com as cenas de origem
+Verificador = Callable[[np.ndarray, Posicao, float, float, np.ndarray], "ResultadoOrigem"]
 
 
 def janela(inicio_campanha: datetime, dias: int = 365) -> tuple[date, date]:
@@ -124,7 +142,9 @@ def localizar(href: str, lon: float, lat: float) -> Posicao:
         if not (0 <= linha < ds.height and 0 <= coluna < ds.width):
             raise ValueError(f"ponto ({lon}, {lat}) fora do raster {href}")
         dist = min(linha, coluna, ds.height - 1 - linha, ds.width - 1 - coluna)
-        return Posicao(x=xs[0], y=ys[0], linha=linha, coluna=coluna, dist_borda_px=dist)
+        xc, yc = ds.xy(linha, coluna)
+        return Posicao(x=xs[0], y=ys[0], linha=linha, coluna=coluna, dist_borda_px=dist,
+                       crs=ds.crs.to_string(), x_centro=xc, y_centro=yc, res=ds.res[0])
 
 
 def um_item_por_periodo(itens: list[pystac.Item], lon: float, lat: float,
@@ -197,6 +217,138 @@ def data_da_observacao(inicio_composicao: date, dia_do_ano: int) -> date:
     return data
 
 
+@dataclass
+class ResultadoOrigem:
+    """Conferência de cada pixel da janela contra as cenas de origem (arrays do tamanho da janela).
+
+    `scl`: SCL da cena escolhida (NaN se nenhuma). `cena`: id da cena escolhida.
+    `n_cenas`: cenas do dia que cobrem o ponto. `n_com_dado`: cenas com dado
+    no pixel. `conflito`: as cenas com dado discordam sobre a validade do SCL.
+    `dif_b04`: |B04 da cena escolhida − B04 do cubo| (reflectância), que mede
+    se a cena reproduz o cubo.
+    """
+    scl: np.ndarray
+    cena: np.ndarray
+    n_cenas: np.ndarray
+    n_com_dado: np.ndarray
+    conflito: np.ndarray
+    dif_b04: np.ndarray
+
+    @classmethod
+    def vazio(cls, forma: tuple[int, int]) -> "ResultadoOrigem":
+        return cls(scl=np.full(forma, np.nan), cena=np.full(forma, None, dtype=object),
+                   n_cenas=np.zeros(forma, dtype=int), n_com_dado=np.zeros(forma, dtype=int),
+                   conflito=np.zeros(forma, dtype=bool), dif_b04=np.full(forma, np.nan))
+
+
+# A cena de origem "reproduz o cubo" se a B04 diferir até isto (reflectância).
+TOLERANCIA_B04 = 0.01
+
+
+def offset_reflectancia(cena_id: str) -> float:
+    """Offset somado às reflectâncias L2A a partir da baseline 04.00 (BOA_ADD_OFFSET = -1000).
+
+    O metadado do S2_L2A-1 não declara o offset; ele foi conferido nos dados:
+    descontado, B04 das cenas N0301 e N0400 reproduz o cubo (docs/piloto/semana-3.md).
+    """
+    m = re.search(r"_N(\d{4})_", cena_id)
+    return 1000.0 if m and int(m.group(1)) >= 400 else 0.0
+
+
+class VerificadorOrigem:
+    """SCL da cena Sentinel-2 L2A de origem para cada pixel da janela.
+
+    Para cada data de PROVENANCE presente na janela, busca as cenas daquele
+    dia que cobrem o ponto e lê, no centro de cada pixel do cubo, o SCL e a
+    B04 de todas elas. Quando há mais de uma cena com dado (tiles sobrepostos,
+    datastrips, reprocessamentos), fica a que melhor reproduz a B04 do cubo.
+    Se as candidatas discordarem sobre a validade e nenhuma reproduzir o cubo
+    (diferença > TOLERANCIA_B04), o pixel é marcado em `conflito` e sai
+    inválido. As buscas ficam em cache por (ponto, dia); vizinhos fora das
+    cenas que cobrem o ponto ficam sem dado (lado conservador).
+    """
+
+    def __init__(self, catalogo: str = CATALOGO):
+        self._cliente = Client.open(catalogo, headers={"User-Agent": USER_AGENT})
+        self._cenas: dict[tuple[float, float, date], list[pystac.Item]] = {}
+
+    def cenas_do_dia(self, lon: float, lat: float, dia: date) -> list[pystac.Item]:
+        chave = (lon, lat, dia)
+        if chave not in self._cenas:
+            busca = self._cliente.search(collections=[COLECAO_ORIGEM],
+                                         intersects={"type": "Point", "coordinates": [lon, lat]},
+                                         datetime=f"{dia.isoformat()}T00:00:00Z/{dia.isoformat()}T23:59:59Z")
+            self._cenas[chave] = sorted(busca.items(), key=lambda it: it.id)
+        return self._cenas[chave]
+
+    def cenas_consultadas(self) -> dict[str, dict]:
+        """Metadados de todas as cenas buscadas, para o manifesto."""
+        saida = {}
+        for itens in self._cenas.values():
+            for it in itens:
+                m = re.search(r"_N(\d{4})_", it.id)
+                saida[it.id] = {"baseline": m.group(1) if m else None, "aquisicao": it.properties.get("datetime"),
+                                "criado": it.properties.get("created"), "atualizado": it.properties.get("updated")}
+        return dict(sorted(saida.items()))
+
+    @staticmethod
+    def _amostrar(href: str, crs_origem: str, xs: list[float], ys: list[float]) -> list[float]:
+        """Valor em cada ponto; NaN fora do raster ou onde o valor é 0 ou o nodata do arquivo."""
+        with rasterio.Env(**GDAL_ENV), rasterio.open(href) as ds:
+            tx, ty = transform(crs_origem, ds.crs, xs, ys)
+            saida = []
+            for x, y in zip(tx, ty):
+                linha, coluna = ds.index(x, y)
+                if not (0 <= linha < ds.height and 0 <= coluna < ds.width):
+                    saida.append(np.nan)
+                    continue
+                valor = ds.read(1, window=Window(coluna, linha, 1, 1))[0, 0].item()
+                saida.append(np.nan if valor == 0 or (ds.nodata is not None and valor == ds.nodata) else float(valor))
+            return saida
+
+    def __call__(self, datas: np.ndarray, posicao: Posicao, lon: float, lat: float,
+                 b04_cubo: np.ndarray) -> ResultadoOrigem:
+        centros = posicao.centros_da_janela((datas.shape[0] - 1) // 2)
+        res = ResultadoOrigem.vazio(datas.shape)
+        for dia in {d for d in datas.ravel() if d is not None}:
+            pixels = list(zip(*np.nonzero(datas == dia)))
+            cenas = self.cenas_do_dia(lon, lat, dia)
+            xs = [centros[i][j][0] for i, j in pixels]
+            ys = [centros[i][j][1] for i, j in pixels]
+            leituras = []  # por cena: (id, scl por pixel, b04 por pixel)
+            for item in cenas:
+                scl = self._amostrar(item.assets["SCL"].href, posicao.crs, xs, ys)
+                b04 = self._amostrar(item.assets["B04"].href, posicao.crs, xs, ys)
+                offset = offset_reflectancia(item.id)
+                leituras.append((item.id, scl, [(v - offset) * 0.0001 for v in b04]))
+            for k, (i, j) in enumerate(pixels):
+                res.n_cenas[i, j] = len(cenas)
+                candidatas = [(cid, scl[k], b04[k]) for cid, scl, b04 in leituras if not np.isnan(scl[k])]
+                res.n_com_dado[i, j] = len(candidatas)
+                if not candidatas:
+                    continue
+                difs = [abs(b04 - b04_cubo[i, j]) if np.isfinite(b04) and np.isfinite(b04_cubo[i, j]) else np.inf
+                        for _, _, b04 in candidatas]
+                melhor = int(np.argmin(difs))
+                validades = {scl in SCL_VALIDOS for _, scl, _ in candidatas}
+                res.conflito[i, j] = len(validades) > 1 and difs[melhor] > TOLERANCIA_B04
+                cid, scl, _ = candidatas[melhor]
+                res.scl[i, j] = scl
+                res.cena[i, j] = cid
+                res.dif_b04[i, j] = difs[melhor]
+        return res
+
+
+_VERIFICADOR_PADRAO: VerificadorOrigem | None = None
+
+
+def _verificador_padrao() -> VerificadorOrigem:
+    global _VERIFICADOR_PADRAO
+    if _VERIFICADOR_PADRAO is None:
+        _VERIFICADOR_PADRAO = VerificadorOrigem()
+    return _VERIFICADOR_PADRAO
+
+
 def _fisico(bruto: np.ndarray, meta: dict, banda: str) -> np.ndarray:
     """Converte para escala física, com NaN onde o valor é nodata."""
     arr = bruto.astype("float64")
@@ -213,7 +365,7 @@ def _validade(v: dict[str, np.ndarray], inicio: date, fim: date) -> tuple[dict[s
                       for linha in v["PROVENANCE"]], dtype=object)
     no_periodo = np.vectorize(lambda d: d is not None and inicio <= d <= fim, otypes=[bool])(datas)
     testes = {
-        "scl": np.isin(v["SCL"], list(SCL_VALIDOS)),
+        "scl_cubo": np.isin(v["SCL"], list(SCL_VALIDOS)),
         "bandas": np.all([np.isfinite(v[b]) for b in BANDAS_ESPECTRAIS + INDICES], axis=0),
         "provenance": no_periodo,
         "nevoa": np.nan_to_num(v["B02"], nan=np.inf) <= B02_MAX,
@@ -225,16 +377,27 @@ def _num(x) -> float | int | None:
     return None if x is None or not np.isfinite(x) else x.item() if hasattr(x, "item") else x
 
 
+def _motivo_scl(scl, rotulo: str) -> str:
+    if scl is None:
+        return f"{rotulo} sem dado"
+    return f"{rotulo} {scl} ({SCL_NOMES.get(scl, 'desconhecida')})"
+
+
 def linha_da_composicao(item: pystac.Item, lon: float, lat: float, posicao: Posicao | None,
-                        leitor: Leitor = ler_janela, paralelo: int = 8) -> dict:
+                        leitor: Leitor = ler_janela, verificador: Verificador | None = None,
+                        paralelo: int = 8) -> dict:
     """Uma linha da série: o pixel do ponto e a janela 3×3 em volta, com qualidade.
 
-    Reflectâncias e índices saem na escala física; nodata vira None. O pixel
-    central é válido se passar em todos os testes (SCL, bandas presentes,
-    PROVENANCE dentro do período, B02 <= B02_MAX); pixels inválidos não são
-    descartados, ficam com o motivo em `motivo_invalido`. `valido_somente_scl`
-    guarda a regra sem o teste de névoa, para análise de sensibilidade.
-    As colunas `viz_*` resumem os pixels válidos da janela.
+    Reflectâncias e índices saem na escala física; nodata vira None. Regra
+    principal (PRD 6.3, decisão D): o pixel é válido se o SCL da cena
+    Sentinel-2 de origem for 4, 5 ou 6, se nenhuma banda estiver sem dado, se
+    a PROVENANCE cair no período e se B02 <= B02_MAX. Pixels inválidos não são
+    descartados: ficam com o motivo em `motivo_invalido`.
+
+    Variantes para análise de sensibilidade, com o SCL do cubo no lugar do
+    da cena de origem: `valido_scl_cubo_b02` (regra anterior) e
+    `valido_somente_scl_cubo` (sem o teste de névoa). As colunas `viz_*`
+    resumem os pixels da janela válidos pela regra principal.
     `posicao` None significa que o ponto não está em nenhum raster do período.
     """
     ini, fim = periodo(item)
@@ -251,8 +414,10 @@ def linha_da_composicao(item: pystac.Item, lon: float, lat: float, posicao: Posi
         "pixel_coluna": posicao.coluna if posicao else None,
     }
     if posicao is None:
-        linha.update({b: None for b in BANDAS_LIDAS + ["NDMI"]})
-        linha.update({"data_observacao": None, "valido": False, "valido_somente_scl": False,
+        linha.update({b: None for b in BANDAS_LIDAS + ["NDMI", "SCL_origem", "dif_b04_origem"]})
+        linha.update({"data_observacao": None, "cena_origem": None, "n_cenas_origem": 0,
+                      "conflito_scl_origem": False, "cenas_origem_janela": None, "valido": False,
+                      "valido_scl_cubo_b02": False, "valido_somente_scl_cubo": False,
                       "motivo_invalido": "ponto fora do raster", "viz_n_pixels": 0, "viz_n_validos": 0})
         return linha
 
@@ -263,18 +428,35 @@ def linha_da_composicao(item: pystac.Item, lon: float, lat: float, posicao: Posi
         v["NDMI"] = (v["B8A"] - v["B11"]) / (v["B8A"] + v["B11"])
 
     testes, datas = _validade(v, ini.date(), fim.date())
-    valido_px = np.all(list(testes.values()), axis=0)
+    origem = (verificador or _verificador_padrao())(datas, posicao, lon, lat, v["B04"])
+    testes["scl_origem"] = np.isin(origem.scl, list(SCL_VALIDOS)) & ~origem.conflito
+
+    comuns = testes["bandas"] & testes["provenance"]
+    valido_px = testes["scl_origem"] & testes["nevoa"] & comuns
     c = v["SCL"].shape[0] // 2
 
     for banda in BANDAS_LIDAS + ["NDMI"]:
         valor = _num(v[banda][c, c])
         linha[banda] = int(valor) if valor is not None and banda in BANDAS_QUALIDADE else valor
+    scl_o = _num(origem.scl[c, c])
+    linha["SCL_origem"] = int(scl_o) if scl_o is not None else None
+    linha["cena_origem"] = origem.cena[c, c]
+    linha["n_cenas_origem"] = int(origem.n_cenas[c, c])
+    linha["conflito_scl_origem"] = bool(origem.conflito[c, c])
+    linha["dif_b04_origem"] = _num(origem.dif_b04[c, c])
+    linha["cenas_origem_janela"] = ";".join(sorted({x for x in origem.cena.ravel() if x})) or None
     linha["data_observacao"] = datas[c, c]
 
     motivos = []
-    scl = linha["SCL"]
-    if not testes["scl"][c, c]:
-        motivos.append("SCL sem dado" if scl is None else f"SCL {scl} ({SCL_NOMES.get(scl, 'desconhecida')})")
+    if datas[c, c] is not None and not testes["scl_origem"][c, c]:
+        if origem.n_cenas[c, c] == 0:
+            motivos.append("sem cena de origem no dia")
+        elif origem.n_com_dado[c, c] == 0:
+            motivos.append("cena de origem sem dado no pixel")
+        elif origem.conflito[c, c]:
+            motivos.append("cenas de origem em conflito e nenhuma reproduz o cubo")
+        else:
+            motivos.append(_motivo_scl(linha["SCL_origem"], "SCL origem"))
     if not testes["bandas"][c, c]:
         motivos.append("banda sem dado")
     if not testes["provenance"][c, c]:
@@ -282,8 +464,9 @@ def linha_da_composicao(item: pystac.Item, lon: float, lat: float, posicao: Posi
     if testes["bandas"][c, c] and not testes["nevoa"][c, c]:
         motivos.append(f"névoa (B02 {linha['B02']:.3f} > {B02_MAX})")
     linha["valido"] = not motivos
-    linha["valido_somente_scl"] = bool(testes["scl"][c, c] and testes["bandas"][c, c] and testes["provenance"][c, c])
     linha["motivo_invalido"] = "; ".join(motivos) or None
+    linha["valido_scl_cubo_b02"] = bool(testes["scl_cubo"][c, c] and testes["nevoa"][c, c] and comuns[c, c])
+    linha["valido_somente_scl_cubo"] = bool(testes["scl_cubo"][c, c] and comuns[c, c])
 
     linha["viz_n_pixels"] = int(valido_px.size)
     linha["viz_n_validos"] = int(valido_px.sum())

@@ -33,8 +33,10 @@ def main(permitir_sujo: bool = False) -> None:
     acesso = datetime.now(timezone.utc).isoformat(timespec="seconds")
     campanhas = pd.read_csv(WABAD / "campanhas.csv", parse_dates=["inicio_relogio"])
     pontos = pd.read_csv(WABAD / "pontos.csv").set_index("sitio")
-    colecao = Client.open(stac.CATALOGO, headers={"User-Agent": stac.USER_AGENT}).get_collection(stac.COLECAO)
+    cliente = Client.open(stac.CATALOGO, headers={"User-Agent": stac.USER_AGENT})
+    colecao = cliente.get_collection(stac.COLECAO)
 
+    verificador = stac.VerificadorOrigem()
     linhas, consultas, itens_usados = [], {}, {}
     for _, camp in campanhas.iterrows():
         sitio = camp["sitio"]
@@ -43,7 +45,7 @@ def main(permitir_sujo: bool = False) -> None:
         itens = stac.buscar_itens(lon, lat, inicio, corte)
         escolhidos = stac.um_item_por_periodo(itens, lon, lat)
         for item, posicao in escolhidos:
-            linha = stac.linha_da_composicao(item, lon, lat, posicao)
+            linha = stac.linha_da_composicao(item, lon, lat, posicao, verificador=verificador)
             linhas.append({"sitio": sitio, "campanha_id": camp["campanha_id"], "corte": corte, **linha})
             checksums = {b: item.assets[b].extra_fields.get("checksum:multihash") for b in stac.BANDAS_LIDAS}
             sem_checksum = [b for b, c in checksums.items() if not c]
@@ -75,11 +77,17 @@ def main(permitir_sujo: bool = False) -> None:
         "codigo": codigo,
         "ambiente": {"python": platform.python_version(), "pystac-client": version("pystac-client"),
                      "rasterio": version("rasterio"), "dependencias": "uv.lock"},
+        "colecao_origem": stac.COLECAO_ORIGEM,
+        "regra_validade": "SCL da cena de origem em scl_validos, B02 <= b02_max_nevoa, bandas presentes, PROVENANCE no período (PRD 6.3, decisão D)",
+        "variantes_sensibilidade": ["valido_scl_cubo_b02", "valido_somente_scl_cubo"],
+        "colecao_origem_versao": cliente.get_collection(stac.COLECAO_ORIGEM).extra_fields.get("version"),
+        "tolerancia_b04_origem": stac.TOLERANCIA_B04,
+        "cenas_origem_usadas": sorted({c for cs in serie["cenas_origem_janela"].dropna() for c in cs.split(";")}),
+        "cenas_origem_consultadas": verificador.cenas_consultadas(),
         "regra_de_corte": "composições com end_datetime <= véspera da primeira gravação (PRD 6.3)",
         "dias_de_serie": DIAS_DE_SERIE,
         "scl_validos": sorted(stac.SCL_VALIDOS),
         "b02_max_nevoa": stac.B02_MAX,
-        "variante_sensibilidade": "valido_somente_scl (sem teste de névoa)",
         "janela_px": 2 * stac.RAIO_JANELA_PX + 1,
         "bandas": stac.BANDAS_LIDAS,
         "consultas": consultas,
