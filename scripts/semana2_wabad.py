@@ -30,7 +30,7 @@ def _commit() -> str:
     """Commit do código; marca `-sujo` se houver mudanças não commitadas."""
     def git(*args: str) -> str:
         return subprocess.run(["git", *args], cwd=RAIZ, capture_output=True, text=True).stdout.strip()
-    return git("rev-parse", "HEAD") + ("-sujo" if git("status", "--porcelain", "--", "src", "scripts") else "")
+    return git("rev-parse", "HEAD") + ("-sujo" if git("status", "--porcelain", "--", "src", "scripts", "tests", "pyproject.toml", "uv.lock") else "")
 
 
 def main(sitios: list[str]) -> None:

@@ -3,7 +3,7 @@
 **Projeto:** Predição de indicadores da comunidade de aves em sistemas cabruca por meio de séries temporais de sensoriamento remoto e monitoramento acústico passivo
 **Tipo:** Pesquisa independente e voluntária, em ciência aberta · cronograma de referência de 24 meses
 **Fonte:** `docs/pre-projeto-bioacustica-inpe.pdf` (pré-projeto de 2 de outubro de 2026)
-**Status:** piloto em andamento — semanas 1 e 2 concluídas em 2026-10-03 (ver `docs/bases/README.md` e `docs/piloto/`)
+**Status:** piloto em andamento — semanas 1 a 3 concluídas em 2026-10-03 (ver `docs/bases/README.md` e `docs/piloto/`)
 
 ---
 
@@ -109,6 +109,7 @@ Tabelas com chaves explícitas e dicionário de dados: `areas`, `pontos`, `campa
 
 - Registrar versão das coleções, data de acesso, IDs de itens STAC, parâmetros de qualidade e decisões de anotação.
 - Janelas ópticas terminam na véspera da primeira gravação de cada sítio × campanha (sem informação futura). A véspera, e não o próprio dia, absorve o fuso desconhecido dos relógios dos gravadores; o fim da campanha nunca é usado como corte. Decidido em 2026-10-03.
+- Pixel óptico válido: SCL 4, 5 ou 6, todas as bandas presentes, PROVENANCE dentro do período da composição e B02 ≤ 0,10 (teste de névoa, porque o SCL classifica névoa fina como solo exposto). A regra só com SCL fica como variante de sensibilidade. Decidido em 2026-10-03 (`docs/piloto/semana-3.md`).
 - Registrar datas de origem e número de observações válidas da composição.
 - Normalização, seleção de variáveis e construção da referência ecológica apenas dentro do treino.
 - Áreas e campanhas da mesma propriedade sempre no mesmo grupo de validação.
@@ -139,7 +140,7 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 |---|---|
 | 1 | ✅ Auditoria do WABAD e dos metadados das bases brasileiras (`docs/bases/`) |
 | 2 | ✅ Pequena seleção de áudios processada e vinculada a datas e pontos (`docs/piloto/semana-2.md`) |
-| 3 | Consulta STAC para locais elegíveis; série curta extraída com máscara de qualidade |
+| 3 | ✅ Consulta STAC para locais elegíveis; série curta extraída com máscara de qualidade (`docs/piloto/semana-3.md`) |
 | 4 | Inventário de dados, exemplo reprodutível da integração e **decisão sobre a base final** |
 
 ### Fases do projeto
