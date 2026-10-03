@@ -144,14 +144,15 @@ Gerado por `scripts/semana4_integracao.py` a partir dos cabeçalhos das tabelas 
 | `minutos_validos` | minutos de áudio válidos na campanha |
 | `especies_detectadas` | espécies detectadas em todos os minutos (não é riqueza real) |
 | `esforco_padrao_min` | esforço comum usado na rarefação (minutos) |
-| `riqueza_rarefeita` | riqueza detectada esperada com o esforço padrão |
-| `especies` | espécies detectadas (separadas por ';') |
+| `riqueza_rarefeita` | riqueza detectada média em subconjuntos aleatórios de `esforco_padrao_min` minutos (data e horário não padronizados) |
+| `especies` | espécies detectadas em todos os minutos (';'); sem esforço padronizado, não usar direto no Jaccard |
 | `corte` | fim da janela de imagens: véspera da 1ª gravação |
 | `composicoes` | composições na janela de 12 meses |
 | `composicoes_usadas` | composições com maioria da janela 3×3 válida |
-| `trimestres_cobertos` | trimestres da janela com ao menos uma composição usada |
+| `trimestres_cobertos` | trimestres da janela com ao menos uma composição usada (pela data de observação) |
+| `n_ultimo_trimestre` | composições usadas no último trimestre antes do corte |
 | `cobertura_ok` | série atende à cobertura mínima (desenho analítico, seção 6) |
 | `ndvi_mediana` | mediana anual do NDVI (estado médio do dossel) |
 | `ndmi_mediana` | mediana anual do NDMI (umidade e estrutura do dossel) |
 | `ndvi_amplitude_p90_p10` | P90 − P10 do NDVI (variação sazonal) |
-| `ndmi_mudanca_recente` | mediana do NDMI no último trimestre − mediana anual (perturbação recente) |
+| `ndmi_mudanca_recente` | mediana do NDMI no último trimestre − mediana anual; vazio com menos de 2 composições no trimestre; mistura fase sazonal e perturbação |

@@ -40,12 +40,12 @@ Todas ficam em `data/processed/` (fora do git, por volume e licença) e são des
 
 A tabela junta, por sítio × campanha, o resumo acústico e os descritores ópticos definidos no [desenho analítico](../desenho-analitico.md) (seções 2, 5 e 6). Ela demonstra que o fluxo funciona de ponta a ponta; **não serve para estimar associações**: são 4 sítios do WABAD, fora de cabruca, sem matas de referência, e o esforço acústico não segue um protocolo padronizado.
 
-| Sítio | Minutos | Espécies detectadas | Riqueza rarefeita (13 min) | Composições usadas | NDVI mediana | NDMI mediana | Amplitude NDVI (P90−P10) | Mudança recente NDMI |
-|---|---|---|---|---|---|---|---|---|
-| RBA | 15 | 28 | 26,1 | 14 | 0,84 | 0,38 | 0,14 | +0,01 |
-| RFP | 31 | 41 | 26,3 | 13 | 0,83 | 0,34 | 0,09 | −0,01 |
-| RGU | 13 | 14 | 14,0 | 13 | 0,87 | 0,41 | 0,10 | −0,06 |
-| RME | 13 | 21 | 21,0 | 20 | 0,87 | 0,39 | 0,11 | −0,04 |
+| Sítio | Minutos | Espécies detectadas | Riqueza rarefeita (13 min) | Composições usadas | No último trimestre | NDVI mediana | NDMI mediana | Amplitude NDVI (P90−P10) | Mudança recente NDMI |
+|---|---|---|---|---|---|---|---|---|---|
+| RBA | 15 | 28 | 26,1 | 14 | 4 | 0,84 | 0,38 | 0,14 | +0,01 |
+| RFP | 31 | 41 | 26,3 | 13 | 5 | 0,83 | 0,34 | 0,09 | −0,01 |
+| RGU | 13 | 14 | 14,0 | 13 | 2 | 0,87 | 0,41 | 0,10 | −0,06 |
+| RME | 13 | 21 | 21,0 | 20 | 6 | 0,87 | 0,39 | 0,11 | −0,04 |
 
 - **Riqueza rarefeita.** Média da riqueza detectada em subconjuntos aleatórios de 13 minutos (o menor esforço entre as campanhas), por rarefação com os minutos como unidades. Ela padroniza só o número de minutos: data e horário não são padronizados, e os minutos do WABAD foram escolhidos pelos autores, incluindo minutos noturnos. No RGU e no RME, com 13 minutos, o valor é o próprio observado. É riqueza **detectada**: não detecção não é ausência. No estudo, o esforço será fixado pelo protocolo, não pelo menor esforço observado.
 - **Descritores ópticos.** Calculados com a mediana da janela 3×3 de cada composição em que a maioria da janela é válida, e só se a série tiver ao menos 10 composições e uma em cada trimestre (pela data de observação). As quatro séries atendem à cobertura. A mudança recente exige 2 composições no último trimestre e, como os cortes caem entre outubro e dezembro, mistura fase sazonal com perturbação; aqui ela não deve ser lida como perturbação.
