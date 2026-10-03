@@ -58,7 +58,7 @@ H1 é uma hipótese de **associação**; H2 e H3 são hipóteses de **ganho de p
 
 O controle M2b separa dois benefícios possíveis da série: uma estimativa mais estável do estado da vegetação (M2b × M2) e informação sobre dinâmica (M3 × M2b). Só o segundo sustenta a afirmação de que a dimensão temporal acrescenta informação.
 
-**Métrica principal:** erro absoluto médio (MAE) da resposta nas propriedades retidas, com intervalo por reamostragem de propriedades. **Decisão E — ganho mínimo relevante [fechada em 2026-10-03]:** em cada comparação, o ganho é relevante se o modelo maior reduzir o MAE em pelo menos 10% do MAE do modelo de base daquela comparação (para H2, 10% do MAE de M2b). Um intervalo que inclua zero e o ganho mínimo é inconclusivo, não evidência de ausência de benefício.
+**Métrica principal:** erro absoluto médio (MAE) da resposta nas propriedades retidas, com intervalo por reamostragem de propriedades. **Em revisão:** a [simulação de dimensionamento](simulacao-dimensionamento.md) mostrou que o intervalo por reamostragem dos erros da validação deixando um fora cobre o ganho verdadeiro em só 54% a 81% das vezes com 10 a 30 cabrucas (viés para baixo e intervalo estreito demais). O método de inferência precisa ser trocado, e sua cobertura verificada na simulação, antes de congelar o desenho. **Decisão E — ganho mínimo relevante [fechada em 2026-10-03]:** em cada comparação, o ganho é relevante se o modelo maior reduzir o MAE em pelo menos 10% do MAE do modelo de base daquela comparação (para H2, 10% do MAE de M2b). Um intervalo que inclua zero e o ganho mínimo é inconclusivo, não evidência de ausência de benefício.
 
 ## 5. Descritores (limitados e ligados a hipóteses)
 
@@ -103,7 +103,7 @@ Um preditor útil pode estar funcionando como substituto de outro fator; desempe
 - **Uma análise principal simples:** regressão linear regularizada com os descritores da seção 5, validação deixando uma propriedade de fora (ou grupos de propriedades vizinhas, se houver dependência espacial entre elas). Random Forest e modelos aditivos entram como análises secundárias, reportadas como tal.
 - Nenhuma escolha (índices, escalas, janelas, hiperparâmetros) é feita com as propriedades retidas.
 - **A validação corresponde à aplicação:** prever uma propriedade nova da mesma região. Transferência para outra paisagem ou para outro ano não é testada pelo desenho e não será afirmada.
-- **Dimensionamento por simulação, antes da coleta:** simular o fluxo completo (heterogeneidade entre propriedades, detecção imperfeita, erro do reconhecedor, lacunas ópticas e validação por propriedade retida) para estimar a precisão do ganho M3 × M2b em função do número de cabrucas. O resultado fecha a Decisão C.
+- **Dimensionamento por simulação, antes da coleta** (primeira versão em [`simulacao-dimensionamento.md`](simulacao-dimensionamento.md)): simular o fluxo completo (heterogeneidade entre propriedades, detecção imperfeita, erro do reconhecedor, lacunas ópticas e validação por propriedade retida) para estimar a precisão do ganho M3 × M2b em função do número de cabrucas. O resultado fecha a Decisão C.
 
 ## Decisões abertas
 
