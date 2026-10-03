@@ -18,17 +18,27 @@ O resultado esperado é quantificar o ganho das séries temporais e os limites d
 
 ## Status
 
-Piloto técnico em andamento, com dados abertos. Até agora:
+Piloto técnico concluído, com dados abertos:
 
 - **Semana 1:** auditoria das bases acústicas abertas. Nenhuma tem gravações em cabruca ou no sul da Bahia, então a pergunta principal depende de parceria ([`docs/bases/`](docs/bases/README.md)).
 - **Semana 2:** 72 gravações de 4 sítios do WABAD (Mata Atlântica do Nordeste) vinculadas a pontos, datas e anotações ([`docs/piloto/semana-2.md`](docs/piloto/semana-2.md)).
 - **Semana 3:** série Sentinel-2 do Brazil Data Cube nesses pontos, terminando na véspera das gravações ([`docs/piloto/semana-3.md`](docs/piloto/semana-3.md)).
+- **Semana 4:** inventário de dados, tabela analítica de exemplo e decisão do portão G1: o projeto segue em cabruca se a parceria for confirmada até 2026-12-02; senão, vira estudo metodológico com dados abertos ([`docs/piloto/semana-4.md`](docs/piloto/semana-4.md)).
 
 O piloto testa o fluxo técnico; ele não mede desempenho de reconhecedor nem capacidade preditiva, e os sítios não são cabrucas. O desenho analítico (resposta ecológica, referência, validação) está sendo revisado antes de qualquer coleta definitiva.
 
 ![Fluxo de dados do piloto](docs/piloto/img/fluxo-piloto.png)
 
 As figuras dos relatórios são geradas por `scripts/figuras_piloto.py` a partir das tabelas do piloto.
+
+## Reproduzir o piloto
+
+```
+uv sync
+uv run python scripts/reproduzir_piloto.py
+```
+
+Roda as quatro etapas (bases, série óptica, integração e figuras). Precisa de internet, baixa cerca de 213 MB do WABAD na primeira vez e leva cerca de 10 minutos. Os dados ficam em `data/`, fora do git; as colunas estão descritas no [dicionário de dados](docs/dicionario-dados.md).
 
 ## Documentação
 

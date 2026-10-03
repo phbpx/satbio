@@ -3,7 +3,7 @@
 **Projeto:** Predição de indicadores da comunidade de aves em sistemas cabruca por meio de séries temporais de sensoriamento remoto e monitoramento acústico passivo
 **Tipo:** Pesquisa independente e voluntária, em ciência aberta · cronograma de referência de 24 meses
 **Fonte:** `docs/pre-projeto-bioacustica-inpe.pdf` (pré-projeto de 2 de outubro de 2026)
-**Status:** piloto em andamento — semanas 1 a 3 concluídas em 2026-10-03 (ver `docs/bases/README.md` e `docs/piloto/`)
+**Status:** piloto concluído em 2026-10-03 (ver `docs/piloto/semana-4.md`); G1 aprovado de forma condicional: caminho A se a parceria for confirmada até 2026-12-02, senão caminho C
 
 ---
 
@@ -143,7 +143,7 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 | 1 | ✅ Auditoria do WABAD e dos metadados das bases brasileiras (`docs/bases/`) |
 | 2 | ✅ Pequena seleção de áudios processada e vinculada a datas e pontos (`docs/piloto/semana-2.md`) |
 | 3 | ✅ Consulta STAC para locais elegíveis; série curta extraída com máscara de qualidade (`docs/piloto/semana-3.md`) |
-| 4 | Inventário de dados, exemplo reprodutível da integração e **decisão sobre a base final** |
+| 4 | ✅ Inventário de dados, exemplo reprodutível da integração e **decisão sobre a base final** (`docs/piloto/semana-4.md`) |
 
 ### Fases do projeto
 
@@ -157,6 +157,8 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 | 6. Escrita | 21–24 | Relatório técnico, artigo, publicação de código e metadados permitidos | Publicação |
 
 ### Caminhos alternativos (decididos em G1)
+
+> **Decisão do G1 (2026-10-03):** B descartado, porque nenhuma base aberta auditada tem gravações de aves em cabruca ou no sul da Bahia. A é o caminho principal, condicional à confirmação de parceria (UESC ou equivalente) até **2026-12-02**; sem parceria até lá, o projeto segue pelo caminho C. Evidência em `docs/piloto/semana-4.md` e `docs/bases/README.md`.
 
 - **A — Cabruca (principal):** gravações de parceria ou campanha padronizada.
 - **B — Integralmente aberto:** se uma base brasileira aberta tiver datas, coordenadas e áreas independentes suficientes; título ajustado ao ecossistema amostrado.

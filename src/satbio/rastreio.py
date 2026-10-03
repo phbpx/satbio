@@ -31,6 +31,8 @@ def estado_do_codigo(raiz: Path, saida: Path, permitir_sujo: bool = False) -> di
     alterados = [linha[3:] for linha in status.splitlines() if linha.strip()]
     estado = {"commit": commit, "sujo": bool(alterados), "arquivos_alterados": alterados, "diff_sha256": None}
     if not alterados:
+        # um diff de execução suja anterior não descreve esta execução
+        (saida / "codigo.diff").unlink(missing_ok=True)
         return estado
     if not permitir_sujo:
         raise RuntimeError(

@@ -18,9 +18,12 @@ def _repo(tmp_path):
     return tmp_path
 
 
-def test_codigo_limpo_registra_commit(tmp_path):
+def test_codigo_limpo_registra_commit_e_apaga_diff_antigo(tmp_path):
     raiz = _repo(tmp_path)
+    (raiz / "saida").mkdir()
+    (raiz / "saida" / "codigo.diff").write_text("diff de uma execução anterior")
     estado = rastreio.estado_do_codigo(raiz, raiz / "saida")
+    assert not (raiz / "saida" / "codigo.diff").exists()
     assert len(estado["commit"]) == 40 and estado["sujo"] is False and estado["diff_sha256"] is None
 
 
