@@ -3,7 +3,7 @@
 **Projeto:** Predição de indicadores da comunidade de aves em sistemas cabruca por meio de séries temporais de sensoriamento remoto e monitoramento acústico passivo
 **Tipo:** Pesquisa independente e voluntária, em ciência aberta · cronograma de referência de 24 meses
 **Fonte:** `docs/pre-projeto-bioacustica-inpe.pdf` (pré-projeto de 2 de outubro de 2026)
-**Status:** pré-projeto; nenhum experimento realizado ainda
+**Status:** piloto em andamento — semana 1 concluída em 2026-10-03 (auditoria de bases; ver `docs/bases/README.md`)
 
 ---
 
@@ -67,9 +67,10 @@ Acesso pelo catálogo STAC do INPE (`https://data.inpe.br/bdc/stac/v1/`).
 
 | Base | Papel | Observação |
 |---|---|---|
-| WABAD v4 (Zenodo) | Primeira candidata para aves | 72 sítios no mundo; verificar sítios brasileiros e licença da versão usada |
-| Soundscape_CCM1_exp01 | Teste do pipeline | Rótulos por grupo, não por espécie; confirmar coordenadas e datas |
-| AnuraSet | Alternativa com anfíbios | Poucos sítios; mudaria o grupo focal |
+| WABAD v4 (Zenodo) | Teste de pipeline e do reconhecedor (auditado) | 9 de 72 sítios no Brasil, nenhum na Bahia; coordenadas por sítio; fuso não declarado; licença divergente (CC BY × CC BY-NC) |
+| Soundscape_CCM1_exp01 | Teste do pipeline (auditado) | SP/MG, 2016–2017; rótulos por grupo; sem coordenadas nos arquivos; GPL-3.0 no repositório |
+| AnuraSet | Teste de leitura de áudio e rótulos (auditado) | 4 sítios de anuros, 2019–2021; sem coordenadas nas fontes; licença divergente (CC BY × CC0); mudaria o grupo focal |
+| Rosa *et al.* 2024 (Zenodo 10556620) | Candidata ao caminho B (a auditar) | Listas de aves por especialistas na Mata Atlântica; sem áudio; coordenadas e datas não verificadas |
 | Campanha própria ou de parceria em cabruca | Base ecológica final | Depende de acesso, especialista e tamanho amostral |
 
 **Critérios para aceitar uma base ecológica**
@@ -136,7 +137,7 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 
 | Semana | Entrega |
 |---|---|
-| 1 | Auditoria do WABAD e dos metadados das bases brasileiras |
+| 1 | ✅ Auditoria do WABAD e dos metadados das bases brasileiras (`docs/bases/`) |
 | 2 | Pequena seleção de áudios processada e vinculada a datas e pontos |
 | 3 | Consulta STAC para locais elegíveis; série curta extraída com máscara de qualidade |
 | 4 | Inventário de dados, exemplo reprodutível da integração e **decisão sobre a base final** |
@@ -182,7 +183,8 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 
 - Colaboradores: apoio em sensoriamento remoto e em ecologia de aves (amostragem e validação taxonômica).
 - Municípios e propriedades com acesso confirmado.
-- Quantos sítios brasileiros adequados existem no WABAD; licença efetiva da versão usada.
+- Licença efetiva do WABAD (CC BY ou CC BY-NC) e do AnuraSet (CC BY ou CC0); fuso dos horários do WABAD e do Soundscape_CCM1.
+- Auditoria do Zenodo 10556620 e busca por grupos que gravam em cabruca no sul da Bahia.
 - Mapa de cobertura validado para as métricas de paisagem (externo ou classificação própria).
 - Orçamento (equipamentos, deslocamento, horas de anotação, armazenamento) — não há preços cotados.
 - Fontes de apoio para a coleta em campo (equipamentos emprestados, parcerias, pequenos financiamentos).
@@ -193,7 +195,8 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 2. INPE. Brazil Data Cube. https://data.inpe.br/bdc/en/data-cube/
 3. INPE. STAC S2-16D-2. https://data.inpe.br/bdc/stac/v1/collections/S2-16D-2
 4. INPE. TerraBrasilis — PRODES Mata Atlântica. https://www.terrabrasilis.dpi.inpe.br/downloads/
-5. Pérez-Granados C et al. WABAD v4. https://doi.org/10.5281/zenodo.20513304
+5. Pérez-Granados C et al. WABAD v4. https://doi.org/10.5281/zenodo.20513304 (concept DOI 10.5281/zenodo.14191523)
 6. Hilasaca LH et al. Soundscape_CCM1_exp01. https://github.com/LEEClab/soundscape_CCM1_exp01
-7. Cañas JS et al. AnuraSet v3. https://doi.org/10.5281/zenodo.8342596
+7. Cañas JS et al. AnuraSet. https://doi.org/10.5281/zenodo.8342596 (concept DOI 10.5281/zenodo.8043209)
 8. Cañas JS et al. *Scientific Data*, 2023. https://doi.org/10.1038/s41597-023-02666-2
+9. Rosa GLM et al. Data from: Acoustic monitoring of anurans and birds in Tropical biomes. Zenodo, 2024. https://doi.org/10.5281/zenodo.10556620
