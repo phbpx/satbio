@@ -160,6 +160,8 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 
 > **Decisão do G1 (2026-10-03):** B descartado, porque nenhuma base aberta auditada tem gravações de aves em cabruca ou no sul da Bahia. A é o caminho principal, condicional à confirmação de parceria (UESC ou equivalente) até **2026-12-02**; sem parceria até lá, o projeto segue pelo caminho C. Evidência em `docs/piloto/semana-4.md` e `docs/bases/README.md`.
 
+> **Foco do projeto (2026-10-03):** o interesse central é a pergunta (quanto séries temporais de satélite acrescentam à predição de aves medidas por gravação em sistemas com dossel parecido e manejo diferente abaixo dele), não a cabruca em si. A cabruca segue como alvo até o G1. Se houver pivô, a nova região ou sistema é escolhido onde houver parceiro e dados que atendam à pergunta (≥ ~30 áreas independentes com coordenadas e protocolo padronizado, gradiente de condição sob dossel parecido, Sentinel-2 utilizável). Alternativas mapeadas em `docs/literatura/alternativas-a-cabruca.md`.
+
 - **A — Cabruca (principal):** gravações de parceria ou campanha padronizada.
 - **B — Integralmente aberto:** se uma base brasileira aberta tiver datas, coordenadas e áreas independentes suficientes; título ajustado ao ecossistema amostrado.
 - **C — Metodológico:** se só houver bases com poucos sítios ou rótulos por grupo; estudo de integração e reconhecimento, sem afirmar predição validada de biodiversidade em cabruca.
