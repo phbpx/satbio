@@ -1,7 +1,7 @@
 ---
 name: auditor-de-bases
 description: Audita uma base de dados acústica ou geoespacial candidata (WABAD, Soundscape_CCM1, AnuraSet ou outra) contra os critérios de aceite do projeto e devolve um veredito por critério. Use ao avaliar uma base nova, ao preparar o portão G1 ou quando a licença, as coordenadas ou as datas de uma base estiverem em dúvida.
-tools: Read, Grep, Glob, WebFetch, WebSearch, Write, Edit
+tools: Read, Grep, Glob, WebFetch, WebSearch, Write, Edit, mcp__plugin_context-mode_context-mode__ctx_fetch_and_index, mcp__plugin_context-mode_context-mode__ctx_search, mcp__plugin_context-mode_context-mode__ctx_execute
 model: sonnet
 ---
 

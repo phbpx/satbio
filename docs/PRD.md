@@ -70,7 +70,7 @@ Acesso pelo catálogo STAC do INPE (`https://data.inpe.br/bdc/stac/v1/`).
 | WABAD v4 (Zenodo) | Teste de pipeline e do reconhecedor (auditado) | 9 de 72 sítios no Brasil, nenhum na Bahia; coordenadas por sítio; fuso não declarado; licença divergente (CC BY × CC BY-NC) |
 | Soundscape_CCM1_exp01 | Teste do pipeline (auditado) | SP/MG, 2016–2017; rótulos por grupo; sem coordenadas nos arquivos; GPL-3.0 no repositório |
 | AnuraSet | Teste de leitura de áudio e rótulos (auditado) | 4 sítios de anuros, 2019–2021; sem coordenadas nas fontes; licença divergente (CC BY × CC0); mudaria o grupo focal |
-| Rosa *et al.* 2024 (Zenodo 10556620) | Candidata ao caminho B (a auditar) | Listas de aves por especialistas na Mata Atlântica; sem áudio; coordenadas e datas não verificadas |
+| Rosa *et al.* 2024 (Zenodo 10556620) | Teste de pipeline e referência de desenho amostral (auditado) | Listas espécie × minuto de aves; PN do Iguaçu (1 parque) e um conjunto costeiro sem estado declarado; sem coordenadas por ponto; sem áudio; CC BY 4.0 |
 | Campanha própria ou de parceria em cabruca | Base ecológica final | Depende de acesso, especialista e tamanho amostral |
 
 **Critérios para aceitar uma base ecológica**
@@ -184,7 +184,7 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 - Colaboradores: apoio em sensoriamento remoto e em ecologia de aves (amostragem e validação taxonômica).
 - Municípios e propriedades com acesso confirmado.
 - Licença efetiva do WABAD (CC BY ou CC BY-NC) e do AnuraSet (CC BY ou CC0); fuso dos horários do WABAD e do Soundscape_CCM1.
-- Auditoria do Zenodo 10556620 e busca por grupos que gravam em cabruca no sul da Bahia.
+- Parceria com o grupo de ecologia de aves da UESC, que já amostrou agroflorestas de cacau no sul da Bahia com pontos de escuta (ver `docs/literatura/bases-acusticas-mata-atlantica.md`).
 - Mapa de cobertura validado para as métricas de paisagem (externo ou classificação própria).
 - Orçamento (equipamentos, deslocamento, horas de anotação, armazenamento) — não há preços cotados.
 - Fontes de apoio para a coleta em campo (equipamentos emprestados, parcerias, pequenos financiamentos).

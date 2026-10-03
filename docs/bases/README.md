@@ -17,7 +17,8 @@ Nenhuma das três atende aos critérios de base ecológica final: nenhuma tem s�
 ## O que isso significa para o G1
 
 - **Caminho A (cabruca) depende de parceria ou campanha própria.** Não foi encontrada base aberta com gravações de aves em cabruca. A busca por grupos que gravam na região ainda está incompleta (ver `docs/literatura/bases-acusticas-mata-atlantica.md`).
-- **Caminho B (dados abertos) tem um candidato novo:** o registro Zenodo 10556620 (Rosa *et al.*, 2024), com listas de espécies de aves feitas por especialistas em gravações da Mata Atlântica costeira e do interior. Ele ainda precisa ser auditado: as colunas, as coordenadas e as datas não foram vistas porque o download dos CSVs retornou HTTP 403.
+- **Caminho B (dados abertos) está sem candidato.** O registro Zenodo 10556620 (Rosa *et al.*, 2024) foi [auditado](rosa-2024-zenodo-10556620.md): tem listas de aves por especialistas, mas só um parque no interior (PN do Iguaçu), um conjunto costeiro sem estado declarado, nenhuma coordenada por ponto e nenhum áudio. Serve como teste de pipeline e referência de desenho amostral.
+- **O caminho A tem um parceiro provável:** o grupo de ecologia de aves da UESC (Morante-Filho, Faria e colaboradores) já amostrou aves com pontos de escuta em 10 a 30 agroflorestas de cacau no sul da Bahia. Detalhes e referências em `docs/literatura/bases-acusticas-mata-atlantica.md`.
 - **Caminho C (metodológico) já é viável** com as bases auditadas.
 
 ## Consequência para as semanas 2 e 3
@@ -37,15 +38,15 @@ Duas ressalvas para essa escolha:
 1. **Licenças:** qual vale para o WABAD (BY ou BY-NC) e para o AnuraSet (BY ou CC0)? Até a resposta dos autores, trate o WABAD como não comercial.
 2. **Fuso:** WABAD e Soundscape_CCM1 não declaram fuso. As gravações do CCM1 (out/2016–jan/2017) caem no horário de verão de SP/MG, então podem estar em UTC−2. Isso é inferência, não verificada.
 3. **Coordenadas do CCM1 e do AnuraSet:** pedir aos autores, se essas bases forem usadas no teste STAC.
-4. **Zenodo 10556620:** auditar colunas, coordenadas e datas; tentar o download de novo mais tarde.
-5. **Parcerias no sul da Bahia:** os contatos dos sítios brasileiros do WABAD (coluna `Contact` do `Metadata.csv`) e grupos da região (UESC, UFSB, CEPLAC) têm gravações ou interesse em cabruca?
+4. **Zenodo 10556620:** coordenadas por gravador e estado do conjunto costeiro (#5) só com os autores; ver as perguntas abertas na auditoria.
+5. **Parcerias no sul da Bahia:** os contatos dos sítios brasileiros do WABAD (coluna `Contact` do `Metadata.csv`) e o grupo da UESC têm gravações ou interesse em uma campanha acústica em cabruca? Pontos de escuta e gravação têm vieses diferentes, então dados de pontos de escuta só servem como referência com tratamento explícito.
 6. **Seleção dos trechos anotados no WABAD:** os Métodos do artigo não foram obtidos (o texto do Europe PMC veio sem eles).
 
 ## Correções a fazer no PRD
 
 - AnuraSet: nenhuma fonte rotula a versão como "v3". O registro 10.5281/zenodo.8342596 é a versão de índice 2 do concept 10.5281/zenodo.8043209, publicada em 2023-06-16.
 - WABAD: concept DOI 10.5281/zenodo.14191523. A licença deve ser registrada como divergente, não só como CC BY-NC 4.0.
-- Seção 5.2: incluir o Zenodo 10556620 como candidato a auditar.
+- Seção 5.2: incluir o Zenodo 10556620 (feito, já auditado).
 
 ## Fontes
 

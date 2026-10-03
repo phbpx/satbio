@@ -1,55 +1,62 @@
-# Bases e estudos de acústica passiva com aves na Mata Atlântica (além de WABAD, Soundscape_CCM1_exp01 e AnuraSet)
+# Bases e estudos de acústica passiva com aves na Mata Atlântica e estudos de aves em cabruca (sul da Bahia)
 
-Data da busca: 2026-10-03 (semana 1 do piloto). Status: **busca incompleta, nada foi aberto na fonte**.
+Busca inicial: 2026-10-03 (semana 1 do piloto). Atualizada em 2026-10-03 (segunda passada, com `ctx_execute` consultando OpenAlex e Crossref).
 
-## Verificação posterior (2026-10-03, sessão principal)
+**Nível de verificação.** "Conferido" abaixo significa: título, autores, ano, periódico e DOI conferidos nos metadados do OpenAlex e do Crossref, e resumo lido via OpenAlex. **Os textos completos não foram abertos** (não conferi métodos além do que o resumo diz, nem número de pontos, datas ou coordenadas). Páginas de editoras e da Authorea não foram abertas (a Authorea retornou HTTP 403).
 
-Dois itens foram abertos na fonte depois desta busca:
+## 1. Dados abertos
 
-- **1.1 Zenodo 10556620 — confirmado.** Registro "Data from: Acoustic monitoring of anurans and birds in Tropical biomes", publicado em 2024-01-23, licença CC BY 4.0 (campo do Zenodo), primeiros autores Rosa G. L. M., Albuquerque P., Alquezar R. D., Anjos L. dos *et al.* A descrição confirma listas de espécies feitas por especialistas em 14.044 gravações de 1 min e lista os conjuntos: Caatinga (#1, #2), Mata Atlântica do interior (#3, #4), Mata Atlântica costeira (#5), Cerrado (#6) e anfíbios (#8, #9). Os arquivos são CSVs (`data_03_PNI_43`, `data_04_PNI_PAM`, `data_05_DadosSC`, `data_06_PNB_12pontos` etc.); o download deles retornou HTTP 403, então colunas, coordenadas e datas continuam **não verificadas**. Não há áudio no registro, só listas. É o candidato mais promissor para o caminho B e deve passar pelo `auditor-de-bases`.
-- **1.2 arXiv 2605.20578 — descartado.** É o PteroSet (Ruiz D. *et al.*, 2026): gravações em Puerto Asís (Putumayo) e Pivijay (Magdalena), Colômbia, 2023–2025. Fora da região do projeto.
+### 1.1 Zenodo 10556620 e artigo associado (conferido em parte)
+- Registro Zenodo "Data from: Acoustic monitoring of anurans and birds in Tropical biomes", 2024-01-23, CC BY 4.0, aberto em sessão anterior: listas de espécies feitas por especialistas em 14.044 gravações de 1 min; conjuntos de Caatinga, Mata Atlântica interior, Mata Atlântica costeira, Cerrado e anfíbios. Só listas, sem áudio. Os CSVs deram HTTP 403, então colunas, coordenadas e datas **não verificadas**.
+- Artigo associado, conferido (OpenAlex + Crossref): de Araújo, C. B.; Lima, M. R.; Albuquerque, P. M. C.; Alquezar, R. D.; ... Simões, C. R. M. A. (UFBA); ... Anjos, L. *Acoustic monitoring of anurans and birds in tropical biomes*. *Biotropica*, 2024. DOI 10.1111/btp.13307. O resumo diz que usa 14.045 gravações de 1 min (o registro Zenodo diz 14.044; a diferença não foi esclarecida) de comunidades de aves e anuros em quatro biomas brasileiros, e avalia esforço temporal e espacial sobre a estimativa de diversidade.
+- Correção da versão anterior: a filiação principal é a Universidade Estadual de Londrina (UEL), não LEEC/UNESP. Um coautor (Cássio R. M. A. Simões) é da UFBA; **não sei se algum conjunto é da Bahia**. Precisa abrir o artigo ou os CSVs.
+- Aplicação ao satbio (minha inferência): possível base para o caminho B, mas dados vêm de sítios não cabruca e do desenho de amostragem de outro estudo; qualquer resultado exige teste antes de ser transferido para cabruca.
 
-O preprint da Authorea (2.1) retornou HTTP 403 e continua não verificado.
+### 1.2 arXiv 2605.20578 (PteroSet) — descartado
+Gravações na Colômbia (Putumayo e Magdalena). Fora da região.
 
-## Aviso sobre verificação
+### 1.3 Descartados por região (só registro)
+SEABAD (arXiv 2605.20853) e conjunto do leste da América do Norte (Zenodo 18041381): títulos vistos em busca, não abertos.
 
-Nesta sessão o `WebFetch` foi bloqueado por um hook (que redireciona para ferramentas `ctx_fetch_and_index`) e essas ferramentas não estavam disponíveis. Só consegui usar `WebSearch`, que devolve títulos, URLs e trechos resumidos. Portanto **nenhuma referência abaixo foi aberta ou conferida na fonte**: todas são "menção indireta". Autores, DOI, licença, número de sítios e períodos precisam ser conferidos abrindo a página antes de qualquer uso no PRD. Onde não vi a informação, escrevo "não verificado" e não preencho.
+### 1.4 Preprint da Authorea (antiga seção 2.1) — descartado
+Conferido via OpenAlex (DOI 10.22541/au.176369414.44388497/v1, 2025): Mendoza-Henao, Á. M.; Tamayo-Quintero, J.; Rivera-Pedroza, L. F.; ... Ulloa, J. S.; Camargo-Gil, C. *Acoustic bird community composition (but not richness) responds to natural coverages in a tropical agro-cultural landscape*. Área de estudo: floresta seca fragmentada no sudoeste da Colômbia, dominada por cana-de-açúcar; compara pesquisa convencional com PAM ao longo de um corredor ripário. Não é Brasil nem cabruca. Só vale como referência metodológica (PAM detectou melhor aves de ambiente fechado), em outro ecossistema; não transferir sem teste.
 
-## 1. Dados abertos (possíveis, a conferir)
+## 2. Estudos de aves em cabruca / agroflorestas de cacau no sul da Bahia (conferidos nos metadados e resumos)
 
-### 1.1 "Data from: Acoustic monitoring of anurans and birds in Tropical biomes" (Zenodo)
-- URL vista no resultado de busca: https://zenodo.org/records/10556620 (não aberta).
-- Artigo associado (URL vista, não aberta): De Araújo et al., 2024, *Biotropica*, https://onlinelibrary.wiley.com/doi/10.1111/btp.13307. A autoria completa e o DOI do registro Zenodo não foram conferidos.
-- O que o trecho de busca diz (não confirmado): listas de espécies feitas por especialistas por inspeção direta de 14.044 gravações de 1 min; gravadores AudioMoth, nov/2018 a mar/2019; inclui Mata Atlântica costeira e interior (um dos conjuntos: 48 pontos em 21 fragmentos de Mata Atlântica submontana secundária tardia, pontos a ≥100 m da borda e ≥200 m entre si); avalia como o esforço temporal e espacial afeta estimativas de diversidade de aves e anuros.
-- Não verificado: áudio incluído ou só listas; coordenadas e datas por ponto; licença; localização exata (o dado de bioma "costeira" não diz se é a Bahia).
-- Contato: autores do artigo (provável vínculo com o LEEC/UNESP Rio Claro, como o AnuraSet; **suposição minha, não verificada**).
-- Relevância possível para o satbio: se tiver listas por espécie de aves por gravação, coordenadas e datas, seria uma base aberta para o caminho B (várias áreas independentes, rótulos por espécie feitos por especialistas, o que falta ao CCM1). Limite: provavelmente não é cabruca nem Bahia. Qualquer resultado obtido aqui precisa de teste antes de ser transferido para cabruca.
+Nenhum usa acústica passiva segundo os resumos lidos; todos os de aves usam pontos de escuta ou métodos de busca ativa.
 
-### 1.2 "A strongly annotated passive acoustic dataset for tropical bird monitoring" (arXiv 2605.20578)
-- URL: https://arxiv.org/abs/2605.20578 (aparece nos resultados; não aberta). Não sei se inclui o Brasil ou a Mata Atlântica; o título diz apenas "tropical". Região, sítios, licença: não verificados.
-- Ação: abrir e checar se há sítios brasileiros. Se não houver, descartar.
+| Estudo | O que o resumo mostra | Grupo |
+|---|---|---|
+| Oliveira, I. S.; Bandeira, E. C.; Figueiredo, M. G.; Morante-Filho, J. C. 2026. *Local management intensity and landscape forest cover affect bird community structure in shaded cocoa agroforests*. *Ornithology Research*. DOI 10.1007/s43388-026-00275-2 | 10 agroflorestas de cacau no sul da Bahia; pontos de escuta; 8.945 aves, 139 espécies (73 florestais). Intensificação de manejo reduz riqueza e abundância de aves florestais; cobertura florestal da paisagem afeta a composição. | UESC |
+| Rocha, J.; Laps, R. R.; Machado, C. G.; Campiolo, S. 2019. *The conservation value of cacao agroforestry for bird functional diversity in tropical agricultural landscapes*. *Ecology and Evolution*. DOI 10.1002/ece3.5021 | Duas paisagens (Una, 49% de mata; Ilhéus, 4,8%); compara cacau agroflorestal e floresta madura; diversidade funcional e taxonômica. Em paisagem florestada, o sistema sustenta diversidade funcional total semelhante à da mata, mas menor para frugívoros/granívoros e insetívoros. | UESC, UFMS, UEFS |
+| Almeida-Rocha, J. M.; Monsalvo, J. A. B.; Oliveira, L. C.; ... 2019. *Diet specialisation reduces the occupancy of cocoa agroforests by diurnal raptors*. *Bird Conservation International*. DOI 10.1017/s0959270919000017 | 16 cabrucas, busca ativa, playback e pontos de escuta; modelos de ocupação. Só rapinantes diurnos. | UESC, UnB, UERJ |
+| Morante-Filho, J. C.; Faria, D.; Mariano-Neto, E.; Rhodes, J. R. 2015. *Birds in anthropogenic landscapes: the responses of ecological groups to forest loss in the Brazilian Atlantic Forest*. *PLoS ONE*. DOI 10.1371/journal.pone.0128923 | 40 sítios florestais, pontos de escuta, limiares de perda de floresta por grupo ecológico. Sítios são **florestais**, não cabruca (pelo resumo); só serve de contexto regional. | UESC, UFBA, UQ |
+| Faria, D.; Paciencia, M. L. B.; Dixo, M.; Laps, R. R.; Baumgarten, J. 2007. *Ferns, frogs, lizards, birds and bats in forest fragments and shade cacao plantations in two contrasting landscapes in the Atlantic forest, Brazil*. *Biodiversity and Conservation*. DOI 10.1007/s10531-007-9189-z | Resumo indisponível no OpenAlex; só título, autores e periódico conferidos. Comparação fragmentos x cacau sombreado em duas paisagens, incluindo aves. | UESC |
+| Cassano, C. R.; Schroth, G.; Faria, D.; Delabie, J. H. C.; Bedê, L. 2008. *Landscape and farm scale management to enhance biodiversity conservation in the cocoa producing region of southern Bahia, Brazil*. *Biodiversity and Conservation*. DOI 10.1007/s10531-008-9526-x | Resumo indisponível; só metadados conferidos. Inclui coautor da CEPLAC (Delabie). | USP, CI, UESC, CEPLAC |
+| Bandeira, E. C.; Morante-Filho, J. C. 2024. *Landscape contexts shape the effects of local factors on the predation of artificial bird nests in cocoa agroforests*. *Landscape Ecology*. DOI 10.1007/s10980-024-01990-1 | 30 agroflorestas de cacau em três regiões; ninhos artificiais. Não mede comunidade de aves, mas mostra rede de propriedades já amostradas. | UESC |
+| Cavarzere, V.; Albano, C.; Tonetti, V. R.; Pacheco, J. F.; Whitney, B. M.; Silveira, L. F. 2019. *An overlooked hotspot for birds in the Atlantic Forest*. *Papéis Avulsos de Zoologia*. DOI 10.11606/1807-0205/2019.59.05 | Lista de 368 espécies da RPPN Serra Bonita (Bahia, 7.500 ha). Não é cabruca; útil como lista regional de referência. | UTFPR, USP e outros |
 
-### 1.3 Descartado por região (só registro)
-- SEABAD (arXiv 2605.20853), sudeste asiático, e o conjunto de leste da América do Norte (Zenodo 18041381): fora da região. Títulos vistos em busca; não abertos.
+Contexto fora de aves (conferido, relevante para escolha de paisagens): Ferreira, J. V. A.; Arroyo-Rodríguez, V.; ... *Landscape forest cover and regional context shape the conservation value of shaded cocoa agroforests for bees...* *Landscape Ecology* 2024, DOI 10.1007/s10980-024-01994-x; mesmo grupo que cita "três regiões" de cacau. Heming, N. M.; Schroth, G.; Talora, D. C. *Cabruca agroforestry systems reduce vulnerability of cacao plantations to climate change in southern Bahia*, *Agronomy for Sustainable Development* 2022, DOI 10.1007/s13593-022-00780-w (não li o resumo).
 
-## 2. Possíveis via parceria
+## 3. Grupos e possíveis parceiros (inferidos das filiações nos metadados; **contatos não localizados**)
 
-### 2.1 Preprint "Acoustic bird community composition (but not richness) responds to natural coverages in a tropical agro-cultural landscape" (Authorea)
-- URL vista: https://www.authorea.com/doi/full/10.22541/au.176369414.44388497/v1 (não aberta); também a página https://www.authorea.com/users/1002249/articles/1362693-... .
-- Do trecho de busca: tema é composição acústica de aves versus cobertura natural em paisagem agrícola tropical, com menção a corredores com árvores e bambu. **Não sei onde foi feito (Brasil ou não), quantos sítios, nem quem são os autores.** Pode não ter relação com a Mata Atlântica. Abrir antes de qualquer conclusão.
+- **UESC (Ilhéus), grupo de ecologia de paisagens e aves de J. C. Morante-Filho, com D. M. de Faria, E. C. Bandeira, I. S. de Oliveira, M. G. Figueiredo, J. Rocha, S. Campiolo.** Único grupo com séries de pontos de escuta em dezenas de agroflorestas de cacau, e que já selecionou propriedades por cobertura florestal da paisagem. Candidato mais forte para validação taxonômica e, se houver, dados de pontos de escuta pareáveis às propriedades. Não encontrei publicação deles com PAM. Observação: o grupo de Morante-Filho pertence à UESC segundo as filiações dos artigos de 2024 e 2026; não verifiquei se mudou.
+- **CEPLAC (J. H. C. Delabie, coautor de Cassano 2008).** Parceiro possível para acesso a propriedades e histórico da região cacaueira; não é grupo de aves, e não conferi seu trabalho atual.
+- **UFBA (E. Mariano-Neto; C. R. M. A. Simões).** Mariano-Neto aparece em Morante-Filho 2015; Simões é coautor do artigo de acústica de 2024. Ponto de contato para saber se há conjunto baiano no Zenodo 10556620.
+- **UEL (L. dos Anjos, C. B. de Araújo)**, autores de 1.1: ponto de contato direto para os dados/listas do Zenodo e para a rotina de inspeção manual.
+- **UFSB, UFMS/UEFS (Laps, Machado):** UFSB não apareceu em nenhum resultado desta rodada; não há evidência para listá-la como parceira.
 
-### 2.2 Grupos de cabruca/UESC
-- Duas buscas direcionadas (cabruca, Ilhéus, UESC, AudioMoth) **não retornaram nenhum estudo de acústica passiva em cabruca**. Isso não prova que não existe: a busca web geral é fraca para literatura em português e para repositórios institucionais.
-- Menção indireta, sem link aberto: um trecho dizia que cacauais têm diversidade alta de aves e abrigam espécies florestais. Origem do trecho não identificada; não usar como citação.
+## 4. Lacunas
 
-## 3. Lacunas
+1. Nenhum estudo de PAM (AudioMoth/BirdNET/índices acústicos) em cabruca foi encontrado no OpenAlex com 6 consultas em inglês e português. Isso não prova inexistência: OpenAlex cobre mal teses, relatórios e literatura cinzenta.
+2. Não foram abertos textos completos: número de pontos por propriedade, datas e disponibilidade dos dados dos estudos da seção 2 são desconhecidos. Não sei se os dados de Oliveira *et al.* 2026 ou Rocha *et al.* 2019 são abertos.
+3. Coordenadas, datas e sítios dos CSVs do Zenodo 10556620 continuam não verificados (HTTP 403); não se sabe se há sítio baiano.
+4. Não buscados: Lattes, SciELO, Dryad/Figshare/GBIF, Xeno-canto/Fonoteca Neotropical, Wildlife Insights/ARBIMON, WikiAves (registros no sul da Bahia), teses da UESC/UFBA.
+5. Contatos (e-mail, vínculo atual) não verificados.
 
-1. Nenhum conjunto aberto com áudio de aves em cabruca foi encontrado nesta busca.
-2. Nenhuma referência pôde ser verificada na fonte (bloqueio de ferramenta), então a tabela de campos pedida (sítios, período, licença, acessibilidade) está quase toda "não verificado".
-3. Não foram pesquisados: GBIF/Xeno-canto (contexto), Dryad, Figshare, SciELO, Google Scholar em português, Plataforma Lattes (UESC, UFSB, CEPLAC, Instituto Arapyaú/IESB, Projeto Mata Atlântica do Sul da Bahia), Wildlife Insights/ARBIMON, Sound Archive Fonoteca Neotropical Jacques Vielliard (UNICAMP).
-4. Pesquisadores de aves em cabruca que fazem levantamentos por pontos de escuta (não acústica passiva) seriam possíveis parceiros de especialista, mas não foram buscados.
+## 5. Implicações para o G1
 
-## 4. Implicações para o projeto
-
-- Para o G1, hoje não há evidência de base aberta em cabruca; o caminho A depende de parceria ou campanha própria, e o B depende de a base 1.1 trazer sítios brasileiros com coordenadas e datas.
-- Próximo passo mínimo: abrir o registro Zenodo 10556620 e o artigo de 2024 (metadados: coordenadas, datas, licença, o que é publicado), abrir o arXiv 2605.20578, e repetir a busca em Lattes/SciELO/Google Scholar com termos em português (cabruca, monitoramento acústico passivo, avifauna). Rodar isso em uma sessão com acesso a `WebFetch` ou às ferramentas ctx.
+- A hipótese de que não há base aberta de áudio em cabruca segue sem contraexemplo, mas só foi testada em bases indexadas; falta checar teses e Lattes.
+- O caminho A depende de parceria. O grupo de Morante-Filho/UESC é o contato mais lógico: tem propriedades, pontos de escuta e conhecimento taxonômico regional. Uma conversa deve esclarecer (i) se há áudio ou só pontos de escuta, (ii) licença e condição de uso dos dados, (iii) se as propriedades podem receber gravadores.
+- Pontos de escuta não são o mesmo que PAM: contagens por ponto e listas por gravação têm vieses diferentes (detecção, esforço, raio). Comparar os dois exige tratamento explícito; este documento não oferece evidência sobre isso em cabruca.
+- Próximos passos mínimos: abrir os textos de Oliveira 2026 e Rocha 2019 (seção de dados), obter os CSVs do Zenodo por outra rota, buscar em Lattes/SciELO/teses.
