@@ -17,6 +17,8 @@ A série vai para `data/processed/stac/serie_s2.csv`, fora do git. O `manifesto.
 
 O catálogo é aberto (sem token), e os COGs aceitam leitura parcial por HTTP: cada composição lê só os blocos em volta do ponto. A extração dos quatro sítios leva cerca de 5 minutos.
 
+![Sítios e tiles do cubo](img/semana3-mapa-sitios.png)
+
 ## Como a série é montada
 
 - **Composições:** cada item do S2-16D-2 é um mosaico de 16 dias que usa, em cada pixel, a observação menos nublada do período. A banda PROVENANCE dá o dia de origem de cada pixel, e a série confere se esse dia cai dentro do período.
@@ -37,6 +39,12 @@ O catálogo é aberto (sem token), e os COGs aceitam leitura parcial por HTTP: c
 - **Vazamento temporal:** nenhum. Nenhuma composição termina depois do corte, e nenhuma data de origem passa dele.
 - **Validade:** 60 de 90 composições são válidas pela regra principal; seriam 61 com o SCL do cubo + B02 e 64 só com o SCL do cubo. As inválidas são nuvem ou sombra. Todas as composições encontraram a cena de origem.
 - **Pixel único × janela:** o NDVI do pixel e a mediana da janela diferem 0,002 na mediana das composições (máximo 0,074), e o desvio-padrão dentro da janela fica perto de 0,006. Isso mostra pouca variação do NDVI nessa janela de 30 m, não que a vegetação seja homogênea: o NDVI do cubo usa B8A, reamostrada de 20 m, o que suaviza diferenças entre pixels vizinhos, e o índice não capta estrutura abaixo do dossel.
+
+![Série de NDVI por sítio, com o corte e o período das gravações](img/semana3-serie-ndvi.png)
+
+Nas quatro séries, nenhuma composição passa do corte, e as composições válidas ficam entre 0,7 e 0,9 de NDVI. As inválidas se espalham de 0 a 0,9: nuvem derruba o NDVI, mas sombra e borda de nuvem podem deixá-lo perto do valor real, por isso a máscara não pode depender só do índice.
+
+![Composições por sítio e motivo de invalidez](img/semana3-qualidade.png)
 
 ## Achados que importam para as próximas etapas
 

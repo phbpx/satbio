@@ -31,6 +31,10 @@ O código passou pelo `revisor-metodologico` antes do commit; as correções que
 - O controle de qualidade confere áudios, anotações e o vínculo com o `Metadata.csv`. O único problema encontrado é o ano declarado (ver abaixo). Todo áudio tem anotação e vice-versa, nenhuma anotação passa do fim do arquivo, não há duplicatas nem horários repetidos no mesmo sítio, e taxa de amostragem e número de minutos batem com o metadado.
 - A maioria das gravações começa entre 4 h e 8 h, mas há minutos noturnos (21 h–3 h).
 
+![Minutos anotados por sítio, por data e hora do relógio do gravador](img/semana2-esforco-acustico.png)
+
+A maior parte dos minutos anotados é do amanhecer (4 h–8 h), mas há minutos noturnos, e o esforço se concentra em poucos dias por sítio: a seleção dos minutos é dos autores do WABAD, não um protocolo padronizado.
+
 ## Achados que importam para as próximas semanas
 
 - **Ano declarado incompleto.** O `Metadata.csv` informa 2022 para os quatro sítios, mas parte dos arquivos é de janeiro de 2023 (`ano_fora_do_declarado` no controle de qualidade). As datas usadas no projeto vêm dos nomes dos arquivos; a coluna do metadado se chama `ano_declarado_metadata` para não ser usada como data.

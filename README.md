@@ -26,6 +26,10 @@ Piloto técnico em andamento, com dados abertos. Até agora:
 
 O piloto testa o fluxo técnico; ele não mede desempenho de reconhecedor nem capacidade preditiva, e os sítios não são cabrucas. O desenho analítico (resposta ecológica, referência, validação) está sendo revisado antes de qualquer coleta definitiva.
 
+![Fluxo de dados do piloto](docs/piloto/img/fluxo-piloto.png)
+
+As figuras dos relatórios são geradas por `scripts/figuras_piloto.py` a partir das tabelas do piloto.
+
 ## Documentação
 
 | Documento | Conteúdo |
