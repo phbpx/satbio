@@ -2,7 +2,7 @@
 
 **Projeto:** Predição de indicadores da comunidade de aves em sistemas cabruca por meio de séries temporais de sensoriamento remoto e monitoramento acústico passivo
 **Tipo:** Pesquisa independente e voluntária, em ciência aberta · cronograma de referência de 24 meses
-**Fonte:** `docs/pre-projeto-bioacustica-inpe.pdf` (pré-projeto de 2 de outubro de 2026, escrito originalmente como proposta de mestrado; este PRD o adapta para um projeto voluntário)
+**Fonte:** `docs/pre-projeto-bioacustica-inpe.pdf` (pré-projeto de 2 de outubro de 2026)
 **Status:** pré-projeto; nenhum experimento realizado ainda
 
 ---
