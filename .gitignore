@@ -1,0 +1,8 @@
+# Dados brutos e processados: volumosos e com licenças próprias
+data/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
