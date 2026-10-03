@@ -22,6 +22,10 @@ Estas regras vêm do pré-projeto e protegem a validade dos resultados, por isso
 - **Rastreabilidade:** registre versão da coleção, data de acesso, IDs de itens STAC, máscaras e parâmetros de qualidade usados em cada extração.
 - **Sensores:** não misture Sentinel-2 e Landsat sem harmonização; reamostragem não cria detalhe.
 
+## Agentes
+
+Em `.claude/agents/` há três subagentes: `auditor-de-bases` (avalia bases candidatas contra os critérios do PRD), `revisor-metodologico` (revisão só de leitura antes de commitar análises) e `pesquisador-bibliografico` (literatura com referências verificadas). Eles estão em teste durante o piloto; ao final, mantenha só os que se mostraram úteis.
+
 ## Dados
 
 Áudio é volumoso (~80 GB estimados para a campanha) e pode ter restrições de licença ou de parceria: não versione áudios, rasters ou coordenadas de propriedades no git. Mantenha a licença de cada base registrada junto ao dado.
