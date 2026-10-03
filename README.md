@@ -18,7 +18,13 @@ O resultado esperado é quantificar o ganho das séries temporais e os limites d
 
 ## Status
 
-Pré-projeto. Nenhum experimento foi realizado ainda. O primeiro passo é um piloto de 30 dias com bases acústicas abertas (WABAD, Soundscape_CCM1) para testar o processamento e a integração com o catálogo STAC do INPE.
+Piloto técnico em andamento, com dados abertos. Até agora:
+
+- **Semana 1:** auditoria das bases acústicas abertas. Nenhuma tem gravações em cabruca ou no sul da Bahia, então a pergunta principal depende de parceria ([`docs/bases/`](docs/bases/README.md)).
+- **Semana 2:** 72 gravações de 4 sítios do WABAD (Mata Atlântica do Nordeste) vinculadas a pontos, datas e anotações ([`docs/piloto/semana-2.md`](docs/piloto/semana-2.md)).
+- **Semana 3:** série Sentinel-2 do Brazil Data Cube nesses pontos, terminando na véspera das gravações ([`docs/piloto/semana-3.md`](docs/piloto/semana-3.md)).
+
+O piloto testa o fluxo técnico; ele não mede desempenho de reconhecedor nem capacidade preditiva, e os sítios não são cabrucas. O desenho analítico (resposta ecológica, referência, validação) está sendo revisado antes de qualquer coleta definitiva.
 
 ## Documentação
 

@@ -119,6 +119,8 @@ Tabelas com chaves explícitas e dicionário de dados: `areas`, `pontos`, `campa
 
 ### 6.4 Modelos
 
+> **Em revisão.** Esta seção e a definição da resposta (5.3, 6.1 RF5) estão sendo substituídas por [`docs/desenho-analitico.md`](desenho-analitico.md), que fixa resposta, referência, papel das matas, comparações (incluindo o controle M2b) e regras de validação. As decisões abertas de lá precisam ser fechadas antes da coleta definitiva.
+
 | Modelo | Preditores | Mede |
 |---|---|---|
 | M0 Referência | Época, esforço, controles ambientais | Erro de base sem óptica |

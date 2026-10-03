@@ -12,13 +12,12 @@ from __future__ import annotations
 
 import json
 import platform
-import subprocess
-import sys
+import argparse
 from datetime import datetime, timezone
 from importlib.metadata import version
 from pathlib import Path
 
-from satbio import acustica, wabad
+from satbio import rastreio, acustica, wabad
 
 SITIOS_PILOTO = ["RBA", "RGU", "RME", "RFP"]
 RAIZ = Path(__file__).resolve().parents[1]
@@ -26,14 +25,9 @@ BRUTO = RAIZ / "data" / "raw" / "wabad"
 PROCESSADO = RAIZ / "data" / "processed" / "wabad"
 
 
-def _commit() -> str:
-    """Commit do código; marca `-sujo` se houver mudanças não commitadas."""
-    def git(*args: str) -> str:
-        return subprocess.run(["git", *args], cwd=RAIZ, capture_output=True, text=True).stdout.strip()
-    return git("rev-parse", "HEAD") + ("-sujo" if git("status", "--porcelain", "--", "src", "scripts", "tests", "pyproject.toml", "uv.lock") else "")
 
-
-def main(sitios: list[str]) -> None:
+def main(sitios: list[str], permitir_sujo: bool = False) -> None:
+    codigo = rastreio.estado_do_codigo(RAIZ, PROCESSADO, permitir_sujo)
     reg = wabad.registro()
     arquivos = wabad.arquivos_do_registro(reg)
 
@@ -75,7 +69,7 @@ def main(sitios: list[str]) -> None:
         "licenca_campo_zenodo": reg.get("metadata", {}).get("license", {}).get("id"),
         "licenca_observacao": "descrição do registro indica CC BY-NC 4.0; tratar como não comercial (ver docs/bases/wabad.md)",
         "executado_em_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "codigo_commit": _commit(),
+        "codigo": codigo,
         "ambiente": {"python": platform.python_version(), "pandas": version("pandas"),
                      "soundfile": version("soundfile"), "dependencias": "uv.lock"},
         "parametros_qc": acustica.PARAMETROS_QC,
@@ -93,4 +87,8 @@ def main(sitios: list[str]) -> None:
 
 
 if __name__ == "__main__":
-    main([s.upper() for s in sys.argv[1:]] or SITIOS_PILOTO)
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("sitios", nargs="*", help=f"sítios do WABAD (padrão: {' '.join(SITIOS_PILOTO)})")
+    parser.add_argument("--permitir-sujo", action="store_true", help="roda com código não commitado e salva o diff")
+    args = parser.parse_args()
+    main([s.upper() for s in args.sitios] or SITIOS_PILOTO, args.permitir_sujo)

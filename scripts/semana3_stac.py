@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import json
 import platform
-import subprocess
+import argparse
 from datetime import datetime, timezone
 from importlib.metadata import version
 from pathlib import Path
@@ -19,7 +19,7 @@ from pathlib import Path
 import pandas as pd
 from pystac_client import Client
 
-from satbio import acustica, stac
+from satbio import rastreio, acustica, stac
 
 RAIZ = Path(__file__).resolve().parents[1]
 WABAD = RAIZ / "data" / "processed" / "wabad"
@@ -27,13 +27,9 @@ SAIDA = RAIZ / "data" / "processed" / "stac"
 DIAS_DE_SERIE = 365
 
 
-def _commit() -> str:
-    def git(*args: str) -> str:
-        return subprocess.run(["git", *args], cwd=RAIZ, capture_output=True, text=True).stdout.strip()
-    return git("rev-parse", "HEAD") + ("-sujo" if git("status", "--porcelain", "--", "src", "scripts", "tests", "pyproject.toml", "uv.lock") else "")
 
-
-def main() -> None:
+def main(permitir_sujo: bool = False) -> None:
+    codigo = rastreio.estado_do_codigo(RAIZ, SAIDA, permitir_sujo)
     acesso = datetime.now(timezone.utc).isoformat(timespec="seconds")
     campanhas = pd.read_csv(WABAD / "campanhas.csv", parse_dates=["inicio_relogio"])
     pontos = pd.read_csv(WABAD / "pontos.csv").set_index("sitio")
@@ -76,7 +72,7 @@ def main() -> None:
         "colecao_titulo": colecao.title,
         "licenca": [l.href for l in colecao.links if l.rel == "license"],
         "acesso_utc": acesso,
-        "codigo_commit": _commit(),
+        "codigo": codigo,
         "ambiente": {"python": platform.python_version(), "pystac-client": version("pystac-client"),
                      "rasterio": version("rasterio"), "dependencias": "uv.lock"},
         "regra_de_corte": "composições com end_datetime <= véspera da primeira gravação (PRD 6.3)",
@@ -96,4 +92,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--permitir-sujo", action="store_true", help="roda com código não commitado e salva o diff")
+    main(parser.parse_args().permitir_sujo)
