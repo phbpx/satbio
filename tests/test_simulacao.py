@@ -166,3 +166,48 @@ def test_permutacao_rejeita_com_sinal_forte_e_nao_sem_sinal():
     rng = np.random.default_rng(16)
     assert simulacao.teste_permutacao(_dados(40, 0.6, 17), np.arange(40), 1.0, rng, n_perm=99) == 0.01
     assert simulacao.teste_permutacao(_dados(40, 0.0, 18), np.arange(40), 1.0, rng, n_perm=99) > 0.05
+
+
+# --- Suposições menos otimistas ----------------------------------------------------------------------
+
+def test_correlacao_entre_dossel_e_dinamica():
+    c = Cenario(n_cabrucas=2000, correlacao_estavel_dinamica=0.8, ruido_dinamica=0.1, ruido_mediana=0.1)
+    dados = simulacao.simular_dados(c, np.random.default_rng(20))
+    assert dados["dinamica"].corr(dados["estavel_mediana"]) == pytest.approx(0.8 / (1 + 0.01), abs=0.05)
+
+
+def test_lacunas_opticas_zeram_e_degradam_a_dinamica():
+    c = Cenario(n_cabrucas=4000, frac_sem_dinamica=0.3, frac_dinamica_degradada=0.3, fator_degradacao=3.0,
+                ruido_dinamica=0.5)
+    dados = simulacao.simular_dados(c, np.random.default_rng(21))
+    assert (dados["dinamica"] == 0).mean() == pytest.approx(0.3, abs=0.03)
+    # variância observada: 0,3·0 + 0,3·(1 + 1,5²) + 0,4·(1 + 0,5²)
+    assert dados["dinamica"].var() == pytest.approx(0.3 * 3.25 + 0.4 * 1.25, rel=0.1)
+
+
+def test_vizinhos_formam_grupos_e_compartilham_paisagem():
+    c = Cenario(n_cabrucas=2000, tamanho_vizinhanca=2, correlacao_vizinhos=0.6, ruido_paisagem=0.0)
+    dados = simulacao.simular_dados(c, np.random.default_rng(22))
+    assert (dados["grupo"].value_counts() == 2).all()
+    pares = dados.groupby("grupo")["paisagem"].agg(["first", "last"])
+    assert pares["first"].corr(pares["last"]) == pytest.approx(0.6, abs=0.06)
+
+
+def test_referencia_b2_exclui_as_matas_da_vizinhanca_retida():
+    c = Cenario(n_cabrucas=20, referencia="B2", n_matas=5)
+    dados = simulacao.simular_dados(c, np.random.default_rng(23))
+    nenhum = np.zeros((1, 20), bool)
+    assert simulacao.respostas(dados, nenhum)[0] == pytest.approx(dados["resposta"].to_numpy())
+    linha = dados.attrs["linha_da_mata"][0]
+    retido = np.zeros((1, 20), bool)
+    retido[0, linha] = True
+    ref = dados.attrs["matas"][dados.attrs["linha_da_mata"] != linha].any(axis=0)
+    esperado = [simulacao._jaccard_distancia(lst, ref) for lst in dados.attrs["listas"]]
+    assert simulacao.respostas(dados, retido)[0] == pytest.approx(esperado)
+
+
+def test_rodar_com_todas_as_suposicoes_menos_otimistas():
+    c = Cenario(n_cabrucas=20, correlacao_estavel_dinamica=0.5, frac_sem_dinamica=0.05,
+                frac_dinamica_degradada=0.25, tamanho_vizinhanca=2, correlacao_vizinhos=0.5, referencia="B2")
+    res = simulacao.rodar(c, repeticoes=2, semente=24, n_boot=50, n_perm=19, treinos=5)
+    assert res[["ic_inferior", "ic_superior", "p_permutacao", "ganho_alcancavel"]].notna().all().all()

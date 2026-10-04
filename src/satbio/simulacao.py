@@ -53,6 +53,24 @@ class Cenario:
     ruido_dinamica: float = 0.7  # amplitude/mudança, sensíveis a lacunas (M3)
     ruido_paisagem: float = 0.2
     lambda_ridge: float = 1.0
+    # Suposições menos otimistas (desligadas por padrão; valores usados em scripts/simulacao_dimensionamento.py).
+    # Correlação entre estado médio do dossel e dinâmica: a parte da dinâmica que a mediana já carrega
+    # não acrescenta a M3.
+    correlacao_estavel_dinamica: float = 0.0
+    # Lacunas ópticas: fração das propriedades sem descritor de dinâmica (série abaixo da cobertura
+    # mínima; o valor vira a média) e fração com descritor degradado (poucas composições), cujo ruído
+    # é multiplicado por `fator_degradacao`. Ver docs/literatura/nebulosidade-sul-bahia.md.
+    frac_sem_dinamica: float = 0.0
+    frac_dinamica_degradada: float = 0.0
+    fator_degradacao: float = 2.0
+    # Dependência espacial: propriedades em vizinhanças de `tamanho_vizinhanca` que compartilham esta
+    # fração da variância do resíduo e da paisagem. A validação e a reamostragem tratam a vizinhança
+    # como grupo (desenho analítico, seção 9).
+    tamanho_vizinhanca: int = 1
+    correlacao_vizinhos: float = 0.0
+    # Referência ecológica: "B1" (matas fixas, fora da amostra) ou "B2" (cada mata fica na vizinhança
+    # de uma cabruca da amostra e sai da referência quando essa vizinhança é retida).
+    referencia: str = "B1"
 
 
 def _jaccard_distancia(lista: np.ndarray, referencia: np.ndarray) -> float:
@@ -71,6 +89,7 @@ class Comunidade:
     intercepto: np.ndarray
     p_det: np.ndarray
     referencia: np.ndarray
+    matas: np.ndarray  # listas de cada mata (mata × espécie); a referência B1 é a união delas
 
 
 def _listas(c: Cenario, especies: dict[str, np.ndarray], condicoes: np.ndarray,
@@ -93,34 +112,79 @@ def sortear_comunidade(c: Cenario, rng: np.random.Generator) -> Comunidade:
     p_min = np.exp(rng.uniform(np.log(c.p_minuto[0]), np.log(c.p_minuto[1]), k))
     especies["p_det"] = 1 - (1 - p_min * c.sensibilidade) ** c.minutos
     condicao_matas = c.condicao_matas + 0.3 * rng.standard_normal(c.n_matas)
-    referencia = _listas(c, especies, condicao_matas, rng).any(axis=0)
-    return Comunidade(**especies, referencia=referencia)
+    matas = _listas(c, especies, condicao_matas, rng)
+    return Comunidade(**especies, referencia=matas.any(axis=0), matas=matas)
 
 
 def simular_dados(c: Cenario, rng: np.random.Generator, comunidade: Comunidade | None = None,
                   n: int | None = None) -> pd.DataFrame:
-    """Uma amostra de propriedades com resposta e preditores observados.
+    """Uma amostra de propriedades com resposta, preditores observados e grupo de validação.
 
     Sem `comunidade`, sorteia uma nova; `n` substitui `c.n_cabrucas` (usado nos ganhos de referência).
+    Com referência B2, as listas das cabrucas e o vínculo de cada mata com uma cabruca ficam em
+    `dados.attrs`, para que a resposta seja recalculada em cada partição (`respostas`).
     """
     n = n or c.n_cabrucas
     com = comunidade or sortear_comunidade(c, rng)
-    s, l, d, e = rng.standard_normal((4, n))
+    s, l, d0, e = rng.standard_normal((4, n))
     residuo = 1.0 - c.sinal_estavel - c.sinal_paisagem - c.sinal_temporal
-    if residuo < 0:
+    if residuo < -1e-9:
         raise ValueError("as frações de sinal somam mais que 1")
+    residuo = max(residuo, 0.0)  # arredondamento quando as frações somam exatamente 1
+    r = c.correlacao_estavel_dinamica
+    d = r * s + np.sqrt(1 - r ** 2) * d0
+    grupo = np.arange(n) // c.tamanho_vizinhanca
+    if c.correlacao_vizinhos:
+        rho = c.correlacao_vizinhos
+        comum = rng.standard_normal((2, grupo.max() + 1))[:, grupo]
+        l = np.sqrt(rho) * comum[0] + np.sqrt(1 - rho) * l
+        e = np.sqrt(rho) * comum[1] + np.sqrt(1 - rho) * e
     condicao = (np.sqrt(c.sinal_estavel) * s + np.sqrt(c.sinal_paisagem) * l
                 + np.sqrt(c.sinal_temporal) * d + np.sqrt(residuo) * e)
+    condicao /= np.sqrt(1 + 2 * r * np.sqrt(c.sinal_estavel * c.sinal_temporal))  # variância 1
     especies = {"intercepto": com.intercepto, "inclinacao": com.inclinacao, "p_det": com.p_det}
-    resposta = np.array([_jaccard_distancia(lst, com.referencia) for lst in _listas(c, especies, condicao, rng)])
+    listas = _listas(c, especies, condicao, rng)
+    resposta = np.array([_jaccard_distancia(lst, com.referencia) for lst in listas])
 
-    return pd.DataFrame({
+    ruido_d = np.full(n, c.ruido_dinamica)
+    sorteio = rng.random(n)
+    sem = sorteio < c.frac_sem_dinamica
+    ruido_d[(sorteio >= c.frac_sem_dinamica) & (sorteio < c.frac_sem_dinamica + c.frac_dinamica_degradada)] *= \
+        c.fator_degradacao
+    dinamica = np.where(sem, 0.0, d + ruido_d * rng.standard_normal(n))  # sem série: imputa a média (0)
+
+    dados = pd.DataFrame({
         "resposta": resposta,
         "estavel_recente": s + c.ruido_recente * rng.standard_normal(n),
         "estavel_mediana": s + c.ruido_mediana * rng.standard_normal(n),
-        "dinamica": d + c.ruido_dinamica * rng.standard_normal(n),
+        "dinamica": dinamica,
         "paisagem": l + c.ruido_paisagem * rng.standard_normal(n),
+        "grupo": grupo,
     })
+    if c.referencia == "B2":
+        dados.attrs = {"listas": listas, "matas": com.matas, "linha_da_mata": rng.integers(0, n, c.n_matas)}
+    elif c.referencia != "B1":
+        raise ValueError(f"referência desconhecida: {c.referencia}")
+    return dados
+
+
+def respostas(dados: pd.DataFrame, retidos: np.ndarray) -> np.ndarray:
+    """Resposta de cada linha (colunas) em cada partição (linhas de `retidos`, máscara das linhas retidas).
+
+    Com B1 a referência é fixa e a resposta é a mesma em todas as partições. Com B2, a referência
+    de cada partição é a união das matas cuja cabruca vizinha ficou no treino.
+    """
+    if "matas" not in dados.attrs:
+        return np.broadcast_to(dados["resposta"].to_numpy(), retidos.shape)
+    listas, matas, linha_da_mata = (dados.attrs[k] for k in ("listas", "matas", "linha_da_mata"))
+    fora = retidos[:, linha_da_mata]  # (partições, matas): mata excluída da referência
+    chaves, inversa = np.unique(fora, axis=0, return_inverse=True)
+    ref = np.array([matas[~ch].any(axis=0) if (~ch).any() else np.zeros(matas.shape[1], bool) for ch in chaves])
+    inter = listas.astype(float) @ ref.T.astype(float)  # (n, chaves)
+    uniao = listas.sum(axis=1)[:, None] + ref.sum(axis=1)[None, :] - inter
+    with np.errstate(invalid="ignore", divide="ignore"):
+        dist = np.where(uniao > 0, 1 - inter / uniao, 0.0)
+    return dist.T[inversa.ravel()]
 
 
 MODELOS = {
@@ -168,9 +232,13 @@ def previsoes_sem_grupo(x: np.ndarray, y: np.ndarray, grupos: np.ndarray, lam: f
     """Previsão de cada linha por um modelo ajustado sem o grupo dela.
 
     `grupos` identifica as unidades que saem juntas (propriedade, ou vizinhas).
-    `contagens` (B, n) são pesos de reamostragem; sem elas, B = 1. Devolve (B, n).
+    `y` é (n,) ou (k, n), a resposta em cada partição (uma por grupo, na ordem de
+    `np.unique(grupos)`; ver `respostas`). `contagens` (B, n) são pesos de
+    reamostragem; sem elas, B = 1. Devolve (B, n).
     """
-    n = len(y)
+    n = len(grupos)
+    if y.ndim == 2 and y.strides[0] == 0:  # mesma resposta em todas as partições (referência B1)
+        y = y[0]
     _, idx = np.unique(grupos, return_inverse=True)
     k = idx.max() + 1
     fora = idx[None, :] != np.arange(k)[:, None]  # (k, n): treino de cada dobra
@@ -180,15 +248,29 @@ def previsoes_sem_grupo(x: np.ndarray, y: np.ndarray, grupos: np.ndarray, lam: f
     for i in range(0, len(cont), bloco):
         c = cont[i:i + bloco]
         pesos = (c[:, None, :] * fora[None]).reshape(-1, n)
-        previsto = _ridge_ponderado(x, y, pesos, lam).reshape(len(c), k, n)
+        yy = y if y.ndim == 1 else np.tile(y, (len(c), 1))
+        previsto = _ridge_ponderado(x, yy, pesos, lam).reshape(len(c), k, n)
         partes.append(previsto[:, idx, np.arange(n)])
     return np.concatenate(partes)
 
 
+def _particoes_por_grupo(grupos: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """(índice do grupo de cada linha, máscara das linhas retidas em cada partição por grupo)."""
+    _, idx = np.unique(grupos, return_inverse=True)
+    return idx, idx[None, :] == np.arange(idx.max() + 1)[:, None]
+
+
+def _grupos(dados: pd.DataFrame) -> np.ndarray:
+    return dados["grupo"].to_numpy() if "grupo" in dados else np.arange(len(dados))
+
+
 def erros_deixando_um_fora(dados: pd.DataFrame, colunas: list[str], lam: float) -> np.ndarray:
-    """Erro absoluto de cada propriedade, prevista por um modelo ajustado sem ela."""
-    x, y = dados[colunas].to_numpy(), dados["resposta"].to_numpy()
-    return np.abs(previsoes_sem_grupo(x, y, np.arange(len(y)), lam)[0] - y)
+    """Erro absoluto de cada propriedade, prevista por um modelo ajustado sem o grupo dela."""
+    grupos = _grupos(dados)
+    idx, retidos = _particoes_por_grupo(grupos)
+    y = respostas(dados, retidos)
+    alvo = y[idx, np.arange(len(idx))]
+    return np.abs(previsoes_sem_grupo(dados[colunas].to_numpy(), y, grupos, lam)[0] - alvo)
 
 
 def _ganho(erros_base: np.ndarray, erros_maior: np.ndarray, pesos: np.ndarray | None = None) -> np.ndarray:
@@ -231,14 +313,17 @@ def intervalo_reajuste(dados: pd.DataFrame, grupos: np.ndarray, lam: float, rng:
     - "basico": 2·ganho_LOO − quantis, que desconta esse deslocamento;
     - "media_reamostras": média das réplicas, para medir o deslocamento.
     """
-    rotulos, idx = np.unique(grupos, return_inverse=True)
-    sorteio = rng.integers(0, len(rotulos), (n_boot, len(rotulos)))
-    contagens = np.stack([np.bincount(s, minlength=len(rotulos)) for s in sorteio])[:, idx]
+    idx, retidos = _particoes_por_grupo(grupos)
+    y = respostas(dados, retidos)
+    alvo = y[idx, np.arange(len(idx))]
+    n_grupos = idx.max() + 1
+    sorteio = rng.integers(0, n_grupos, (n_boot, n_grupos))
+    contagens = np.stack([np.bincount(s, minlength=n_grupos) for s in sorteio])[:, idx]
     erros, erros_loo = {}, {}
     for m in ("M2b", "M3"):
-        x, y = _xy(dados, m)
-        erros[m] = np.abs(previsoes_sem_grupo(x, y, grupos, lam, contagens) - y)
-        erros_loo[m] = np.abs(previsoes_sem_grupo(x, y, grupos, lam)[0] - y)
+        x = dados[MODELOS[m]].to_numpy()
+        erros[m] = np.abs(previsoes_sem_grupo(x, y, grupos, lam, contagens) - alvo)
+        erros_loo[m] = np.abs(previsoes_sem_grupo(x, y, grupos, lam)[0] - alvo)
     with np.errstate(invalid="ignore", divide="ignore"):  # réplica degenerada (um só grupo) vira NaN
         boot = _ganho(erros["M2b"], erros["M3"], contagens)
     ganho = float(_ganho(erros_loo["M2b"], erros_loo["M3"]))
@@ -267,10 +352,10 @@ def intervalo_cv_corrigido(dados: pd.DataFrame, grupos: np.ndarray, lam: float, 
         dobra_linha = rng.permutation(np.arange(n_grupos) % k)[idx]
         teste.extend(dobra_linha == f for f in range(k))
     teste = np.array(teste)
+    y = respostas(dados, teste)  # com B2, a referência de cada dobra exclui as matas das vizinhanças retidas
     mae = {}
     for m in ("M2b", "M3"):
-        x, y = _xy(dados, m)
-        err = np.abs(_ridge_ponderado(x, y, ~teste, lam) - y)
+        err = np.abs(_ridge_ponderado(dados[MODELOS[m]].to_numpy(), y, ~teste, lam) - y)
         mae[m] = (err * teste).sum(axis=1) / teste.sum(axis=1)
     d, b = mae["M2b"] - mae["M3"], mae["M2b"]
     r = d.mean() / b.mean()
@@ -302,24 +387,25 @@ def teste_permutacao(dados: pd.DataFrame, grupos: np.ndarray, lam: float, rng: n
     for correlacionada com outros preditores, a permutação quebra essa
     correlação e a hipótese nula testada passa a ser "dinâmica é ruído puro".
     """
-    x2b, y = _xy(dados, "M2b")
-    x3 = dados[MODELOS["M3"]].to_numpy()
-    e2b = np.abs(previsoes_sem_grupo(x2b, y, grupos, lam)[0] - y)
-    observado = _ganho(e2b, np.abs(previsoes_sem_grupo(x3, y, grupos, lam)[0] - y))
+    idx, retidos = _particoes_por_grupo(grupos)
+    y = respostas(dados, retidos)
+    n = len(idx)
+    alvo = y[idx, np.arange(n)]
+    x2b, x3 = dados[MODELOS["M2b"]].to_numpy(), dados[MODELOS["M3"]].to_numpy()
+    e2b = np.abs(previsoes_sem_grupo(x2b, y, grupos, lam)[0] - alvo)
+    observado = _ganho(e2b, np.abs(previsoes_sem_grupo(x3, y, grupos, lam)[0] - alvo))
     col = MODELOS["M3"].index("dinamica")
-    n = len(y)
     perm = np.repeat(x3[None], n_perm, axis=0)
     if len(np.unique(grupos)) == n:
         perm[:, :, col] = x3[np.argsort(rng.random((n_perm, n)), axis=1), col]
     else:
         for i in range(n_perm):
             perm[i, :, col] = _permutar_por_grupo(x3[:, col], grupos, rng)
-    _, idx = np.unique(grupos, return_inverse=True)
     k = idx.max() + 1
-    fora = (idx[None, :] != np.arange(k)[:, None]).astype(float)  # (k, n)
     xs = np.repeat(perm, k, axis=0)  # (n_perm·k, n, p)
-    previsto = _ridge_ponderado(xs, y, np.tile(fora, (n_perm, 1)), lam).reshape(n_perm, k, n)[:, idx, np.arange(n)]
-    ganhos = _ganho(e2b, np.abs(previsto - y))
+    yy = y[0] if y.strides[0] == 0 else np.tile(y, (n_perm, 1))
+    previsto = _ridge_ponderado(xs, yy, np.tile(~retidos, (n_perm, 1)), lam).reshape(n_perm, k, n)
+    ganhos = _ganho(e2b, np.abs(previsto[:, idx, np.arange(n)] - alvo))
     return float((1 + (ganhos >= observado).sum()) / (1 + n_perm))
 
 
@@ -399,7 +485,7 @@ def rodar(c: Cenario, repeticoes: int, semente: int, metodo: str = METODO_ADOTAD
     for r in range(repeticoes):
         comunidade = sortear_comunidade(c, rng)
         dados = simular_dados(c, rng, comunidade)
-        grupos = np.arange(len(dados))
+        grupos = _grupos(dados)
         verdadeiro = ganho_verdadeiro(c, comunidade, rng, treinos=treinos)
         erros = {m: erros_deixando_um_fora(dados, cols, c.lambda_ridge) for m, cols in MODELOS.items()}
         ganho, inf_f, sup_f = ganho_com_intervalo(erros["M2b"], erros["M3"], rng)
