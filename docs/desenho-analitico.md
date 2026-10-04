@@ -1,6 +1,6 @@
 # Desenho analítico — satbio
 
-**Status:** rascunho, 2026-10-03; decisões A, D e E fechadas em 2026-10-03, B e C abertas. Responde à revisão externa do projeto feita após o piloto técnico. Substitui a seção 6.4 do PRD quando aprovado. As decisões marcadas **[aberta]** precisam ser fechadas antes da coleta definitiva; depois disso este documento é congelado (versão e data registradas) e qualquer mudança passa a ser registrada como desvio.
+**Status:** rascunho, 2026-10-03; decisões A, D e E fechadas em 2026-10-03, inferência e estimando de H2 em 2026-10-04; B e C abertas. Responde à revisão externa do projeto feita após o piloto técnico. Substitui a seção 6.4 do PRD quando aprovado. As decisões marcadas **[aberta]** precisam ser fechadas antes da coleta definitiva; depois disso este documento é congelado (versão e data registradas) e qualquer mudança passa a ser registrada como desvio.
 
 Este documento existe porque o PRD descreve bem o que medir, mas não fixa a ligação entre o que será gravado, o indicador ecológico calculado e o que o modelo prevê. Sem essa ligação, um modelo pode ter bom desempenho respondendo a uma pergunta diferente da proposta.
 
@@ -58,7 +58,23 @@ H1 é uma hipótese de **associação**; H2 e H3 são hipóteses de **ganho de p
 
 O controle M2b separa dois benefícios possíveis da série: uma estimativa mais estável do estado da vegetação (M2b × M2) e informação sobre dinâmica (M3 × M2b). Só o segundo sustenta a afirmação de que a dimensão temporal acrescenta informação.
 
-**Métrica principal:** erro absoluto médio (MAE) da resposta nas propriedades retidas, com intervalo por reamostragem de propriedades. **Em revisão:** a [simulação de dimensionamento](simulacao-dimensionamento.md) mostrou que o intervalo por reamostragem dos erros da validação deixando um fora cobre o ganho verdadeiro em só 54% a 81% das vezes com 10 a 30 cabrucas (viés para baixo e intervalo estreito demais). O método de inferência precisa ser trocado, e sua cobertura verificada na simulação, antes de congelar o desenho. **Decisão E — ganho mínimo relevante [fechada em 2026-10-03]:** em cada comparação, o ganho é relevante se o modelo maior reduzir o MAE em pelo menos 10% do MAE do modelo de base daquela comparação (para H2, 10% do MAE de M2b). Um intervalo que inclua zero e o ganho mínimo é inconclusivo, não evidência de ausência de benefício.
+**Métrica principal:** erro absoluto médio (MAE) da resposta nas propriedades retidas.
+
+**H2 é uma estimação, não um teste de limiar [fechado em 2026-10-04].** O resultado principal de H2 é a estimativa do ganho de M3 sobre M2b, 1 − MAE(M3)/MAE(M2b), com intervalo de 90%. A largura do intervalo (precisão) é reportada junto, porque com o número de cabrucas viável ela é da ordem do próprio ganho ([simulação](simulacao-dimensionamento.md)).
+
+- **Estimando: o ganho alcançável com o n do estudo.** É o ganho que modelos ajustados com as n cabrucas do estudo teriam em propriedades novas da mesma região. A alternativa, o ganho de população (com modelos ajustados em muitas propriedades), mede se a informação existe no satélite, mas a validação cruzada estima o desempenho do ajuste com cerca de n propriedades, e passar dele ao de população exigiria extrapolar em n, o que os dados não sustentam. Nas simulações o ganho alcançável fica abaixo do de população (5 pontos a menos com 10 cabrucas, 2 com 30), então um ganho alcançável positivo é uma leitura conservadora do de população; o contrário não vale, e um ganho alcançável nulo com poucas cabrucas não descarta informação no satélite.
+- **Método de inferência: reamostragem de propriedades com reajuste, intervalo básico.** Cada réplica sorteia propriedades (ou grupos de propriedades vizinhas) com reposição e refaz a validação por propriedade retida, com as cópias da retida fora do treino; o intervalo é 2·ganho − quantis das réplicas, o que desconta o deslocamento para baixo das réplicas (cada uma treina com ~63% de propriedades distintas). Escolhido por ter a cobertura mais próxima de 90% contra o estimando: 90% no geral e 85% a 100% por cenário, contra 74% do método anterior (reamostragem dos erros fixos), 84% da validação cruzada repetida com correção de variância e 97% do intervalo percentil (conservador). Na análise real, com pelo menos 2.000 réplicas. Detalhes em [`simulacao-dimensionamento.md`](simulacao-dimensionamento.md).
+- **Análise complementar:** teste de permutação do descritor de dinâmica entre propriedades (valor-p unilateral para ganho > 0). Tem o tamanho correto (4,6% a 5% para α = 5%) e mais poder que o intervalo, mas não diz o tamanho do ganho; é reportado ao lado, não no lugar.
+
+**Decisão E — ganho mínimo relevante, como regra de interpretação [fechada em 2026-10-03; papel revisto em 2026-10-04].** O ganho é relevante se for de pelo menos 10% do MAE do modelo de base de cada comparação (para H2, 10% do MAE de M2b). A decisão E não decide H2; ela diz como ler o intervalo. As leituras, fixadas antes dos dados:
+
+| Leitura | Quando | O que se escreve |
+|---|---|---|
+| Ganho relevante | Intervalo inteiro ≥ 10% | A dinâmica acrescenta um ganho relevante com este n |
+| Positivo, tamanho incerto | Intervalo exclui zero, estimativa ≥ 10%, limite inferior < 10% | Há ganho; não se sabe se é relevante |
+| Positivo pequeno | Intervalo entre 0 e 10% | Há ganho, abaixo do relevante |
+| Relevante descartado | Limite superior < 10% e intervalo inclui zero | Um ganho relevante é improvável com este n; não é evidência de que a informação não existe no satélite |
+| Inconclusivo | Os demais casos (o intervalo inclui zero e 10%) | O estudo não tem precisão para dizer; reporta-se a largura do intervalo |
 
 ## 5. Descritores (limitados e ligados a hipóteses)
 
@@ -103,7 +119,8 @@ Um preditor útil pode estar funcionando como substituto de outro fator; desempe
 - **Uma análise principal simples:** regressão linear regularizada com os descritores da seção 5, validação deixando uma propriedade de fora (ou grupos de propriedades vizinhas, se houver dependência espacial entre elas). Random Forest e modelos aditivos entram como análises secundárias, reportadas como tal.
 - Nenhuma escolha (índices, escalas, janelas, hiperparâmetros) é feita com as propriedades retidas.
 - **A validação corresponde à aplicação:** prever uma propriedade nova da mesma região. Transferência para outra paisagem ou para outro ano não é testada pelo desenho e não será afirmada.
-- **Dimensionamento por simulação, antes da coleta** (primeira versão em [`simulacao-dimensionamento.md`](simulacao-dimensionamento.md)): simular o fluxo completo (heterogeneidade entre propriedades, detecção imperfeita, erro do reconhecedor, lacunas ópticas e validação por propriedade retida) para estimar a precisão do ganho M3 × M2b em função do número de cabrucas. O resultado fecha a Decisão C.
+- **Intervalo do ganho** pela reamostragem de propriedades com reajuste (intervalo básico, seção 4), com as réplicas sorteando os mesmos grupos usados na validação.
+- **Dimensionamento por simulação, antes da coleta** ([`simulacao-dimensionamento.md`](simulacao-dimensionamento.md)): simula o fluxo completo (heterogeneidade entre propriedades, detecção imperfeita, erro do reconhecedor, lacunas ópticas e validação por propriedade retida) e o método de inferência adotado, e mede a precisão do ganho M3 × M2b em função do número de cabrucas. O critério de dimensionamento é a precisão (largura do intervalo), não a chance de "confirmar" o ganho. O resultado fecha a Decisão C.
 
 ## Decisões abertas
 
@@ -113,10 +130,13 @@ Um preditor útil pode estar funcionando como substituto de outro fator; desempe
 | B | Referência independente ou construída no treino | Acesso a matas com o mesmo protocolo | B1, se a parceria permitir |
 | C | Número de cabrucas e de matas | Parceria (UESC), recursos, simulação | Fechar após a simulação |
 | D | Regra de validade do pixel | Custo da consulta à cena de origem | **Fechada:** SCL da cena de origem + B02 ≤ 0,10 |
-| E | Ganho mínimo relevante | Julgamento ecológico | **Fechada:** 10% do MAE do modelo de base de cada comparação |
+| E | Ganho mínimo relevante | Julgamento ecológico | **Fechada:** 10% do MAE do modelo de base de cada comparação; desde 2026-10-04, regra de interpretação do intervalo (seção 4) |
+| — | Inferência e estimando de H2 | Simulação | **Fechado em 2026-10-04:** ganho alcançável com o n do estudo; reamostragem de propriedades com reajuste, intervalo básico |
 
 ## Referências desta seção
 
 - Baselga A. 2012. The relationship between species replacement, dissimilarity derived from nestedness, and nestedness. *Global Ecology and Biogeography* 21: 1223–1232. https://doi.org/10.1111/j.1466-8238.2011.00756.x
 - Oliveira IS, Bandeira EC, Figueiredo MG, Morante-Filho JC. 2026. *Ornithology Research* 34: 13. https://doi.org/10.1007/s43388-026-00275-2
+- Bouckaert RR, Frank E. 2004. Evaluating the replicability of significance tests for comparing learning algorithms. *PAKDD 2004*, LNCS 3056: 3–12. https://doi.org/10.1007/978-3-540-24775-3_3
+- Nadeau C, Bengio Y. 2003. Inference for the generalization error. *Machine Learning* 52: 239–281. https://doi.org/10.1023/A:1024068626366
 - Roberts DR *et al.* 2017. Cross-validation strategies for data with temporal, spatial, hierarchical, or phylogenetic structure. *Ecography* 40: 913–929. https://doi.org/10.1111/ecog.02881
