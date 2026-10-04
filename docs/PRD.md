@@ -1,7 +1,7 @@
 # PRD — satbio
 
 **Projeto:** Predição de indicadores da comunidade de aves em sistemas cabruca por meio de séries temporais de sensoriamento remoto e monitoramento acústico passivo
-**Tipo:** Pesquisa independente e voluntária, em ciência aberta · cronograma de referência de 24 meses
+**Tipo:** Pesquisa independente e voluntária, em ciência aberta · fases condicionadas aos portões de decisão, sem cronograma fixo
 **Fonte:** `docs/pre-projeto-bioacustica-inpe.pdf` (pré-projeto de 2 de outubro de 2026)
 **Status:** piloto concluído em 2026-10-03 (ver `docs/piloto/semana-4.md`); G1 aprovado de forma condicional: caminho A (ou A-retro) se a parceria for confirmada até 2026-12-02, senão caminho C. Contato com a UESC enviado em 2026-10-04, sem resposta até agora
 
@@ -29,7 +29,7 @@ Sistemas cabruca mantêm cacau sob árvores de sombra no sul da Bahia e variam e
 | ID | Hipótese | Resultado observável |
 |---|---|---|
 | H1 | Contexto da paisagem | Maior cobertura nativa e menor isolamento associam-se a maior semelhança com comunidades de referência |
-| H2 | Informação temporal | Amplitude sazonal e histórico espectral reduzem o erro de predição fora da amostra |
+| H2 | Informação temporal | Ganho de M3 sobre M2b no erro fora da amostra, **estimado com intervalo** (estimação, não teste de limiar; ver desenho analítico, seção 4) |
 | H3 | Escala espacial | Descritores do entorno acrescentam informação além do ponto de gravação |
 
 Um ganho temporal pequeno ou ausente também é resultado válido: ele delimita o uso do método. Associações entre manejo e aves não serão interpretadas como causais.
@@ -81,7 +81,7 @@ Acesso pelo catálogo STAC do INPE (`https://data.inpe.br/bdc/stac/v1/`).
 
 ### 5.3 Desenho amostral em cabruca (proposta inicial)
 
-- 24 a 36 áreas independentes (cabrucas em gradiente de manejo + fragmentos de mata de referência); tamanho final definido por piloto e simulação de poder.
+- Áreas independentes: cabrucas em gradiente de manejo + fragmentos de mata de referência. O número de cabrucas é a decisão C do desenho analítico; pela [simulação](simulacao-dimensionamento.md), 10 a 30 cabrucas deixam H2 exploratória, ~60 são o mínimo para ver um ganho de ~20% e 85 a 95 dão precisão de ±0,10.
 - Unidade independente: propriedade ou fragmento. Pontos na mesma área são subamostras.
 - Protocolo: 1 min a cada 5 min, 3 h a partir do amanhecer, 7 dias, 2 campanhas sazonais → 504 min por ponto.
 - Estimativa para 30 pontos: ~252 h de áudio, ~80 GB (WAV mono, 44,1 kHz, 16 bits), sem contar cópias e processamento.
@@ -119,16 +119,7 @@ Tabelas com chaves explícitas e dicionário de dados: `areas`, `pontos`, `campa
 
 ### 6.4 Modelos
 
-> **Em revisão.** Esta seção e a definição da resposta (5.3, 6.1 RF5) estão sendo substituídas por [`docs/desenho-analitico.md`](desenho-analitico.md), que fixa resposta, referência, papel das matas, comparações (incluindo o controle M2b) e regras de validação. As decisões abertas de lá precisam ser fechadas antes da coleta definitiva.
-
-| Modelo | Preditores | Mede |
-|---|---|---|
-| M0 Referência | Época, esforço, controles ambientais | Erro de base sem óptica |
-| M1 Um período | M0 + espectrais de uma janela recente | Ganho local |
-| M2 Paisagem | M1 + cobertura e configuração do entorno | Ganho espacial (H1, H3) |
-| M3 Séries temporais | M2 + amplitude, variabilidade, histórico | Ganho temporal (H2) |
-
-Famílias: regressão regularizada ou aditiva vs. Random Forest; família estatística compatível com a resposta (sem gaussiana automática para contagens).
+Definidos no [desenho analítico](desenho-analitico.md) (resposta, referência, papel das matas, decisões A–E, inferência), que substitui a versão original desta seção: M0 (esforço e detecção), M1 (+ janela recente), M2 (+ paisagem), M2b (+ mediana histórica) e M3 (+ dinâmica); H2 é M3 × M2b. Análise principal em regressão linear regularizada com validação por propriedade; Random Forest, modelos aditivos e o M3-S1 (Sentinel-1) são secundários.
 
 ### 6.5 Tecnologia
 
@@ -136,25 +127,37 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 
 ## 7. Roadmap
 
-### Fase 0 — Piloto de 30 dias
+### Piloto técnico (executado em 2026-10-02 e 03)
 
-| Semana | Entrega |
-|---|---|
-| 1 | ✅ Auditoria do WABAD e dos metadados das bases brasileiras (`docs/bases/`) |
-| 2 | ✅ Pequena seleção de áudios processada e vinculada a datas e pontos (`docs/piloto/semana-2.md`) |
-| 3 | ✅ Consulta STAC para locais elegíveis; série curta extraída com máscara de qualidade (`docs/piloto/semana-3.md`) |
-| 4 | ✅ Inventário de dados, exemplo reprodutível da integração e **decisão sobre a base final** (`docs/piloto/semana-4.md`) |
+| Etapa | Executada em | Entrega |
+|---|---|---|
+| Preparação | 2026-10-02 | PRD e pré-projeto revisados como pesquisa voluntária |
+| 1. Bases acústicas | 2026-10-03 | ✅ Auditoria do WABAD e de outras três bases (`docs/bases/`) |
+| 2. Áudio | 2026-10-03 | ✅ 72 gravações do WABAD vinculadas a pontos, datas e anotações (`docs/piloto/semana-2.md`) |
+| 3. Série óptica | 2026-10-03 | ✅ S2-16D-2 até a véspera das gravações, com o SCL conferido na cena de origem (decisão D; `docs/piloto/semana-3.md`) |
+| 4. Integração e G1 | 2026-10-03 | ✅ Inventário, tabela analítica reproduzível e decisão do G1 (`docs/piloto/semana-4.md`) |
+| Pós-piloto | 2026-10-03 e 04 | Desenho analítico, simulação de dimensionamento, revisão de calibração, nebulosidade regional, nota do Sentinel-1 |
 
-### Fases do projeto
+Os relatórios mantêm os nomes `semana-N.md` do plano original de 30 dias; as quatro etapas foram feitas em um dia.
 
-| Fase | Meses | Entregas | Portão de decisão |
-|---|---|---|---|
-| 1. Fundação | 1–3 | Revisão bibliográfica, auditoria de metadados, primeira extração óptica, parceria definida | **G1:** base final escolhida (cabruca com parceria / campanha própria / alternativa aberta) |
-| 2. Piloto | 4–6 | Piloto de gravação ou amostra existente; validação do reconhecedor; simulação de poder | **G2:** número de áreas e esforço confirmados |
-| 3. Coleta | 7–12 | Campanhas sazonais ou consolidação de dados existentes; QC e documentação | **G3:** dados suficientes para as duas campanhas |
-| 4. Indicadores | 13–16 | Anotações finais, indicadores ecológicos, séries temporais extraídas | **G4:** incerteza da anotação aceitável para os indicadores |
-| 5. Modelagem | 17–20 | Modelos M0–M3, validação espacial, sensibilidade | **G5:** resultados avaliados como confirmatórios ou exploratórios |
-| 6. Escrita | 21–24 | Relatório técnico, artigo, publicação de código e metadados permitidos | Publicação |
+### Fases depois do G1
+
+Nenhuma fase tem data fixa: cada uma começa quando o portão anterior é decidido. As estimativas de esforço são de trabalho voluntário em tempo parcial e servem para comparar caminhos, não como compromisso.
+
+| Caminho | Fase | Entrega | Esforço estimado | Portão |
+|---|---|---|---|---|
+| Todos | G1 | Resposta da UESC (contato enviado em 2026-10-04) | — | **G1, até 2026-12-02:** A, A-retro ou C |
+| A | A1. Piloto de campo | Protocolo em 2–4 propriedades: curvas de acumulação, repetibilidade, pontos por propriedade | ~1 mês de campo + 1 de análise | **G2:** número de cabrucas e esforço, com a simulação refeita com os valores do piloto |
+| A | A2. Coleta | Duas campanhas com ~6 meses de intervalo, QC e documentação | ~8 meses de calendário | **G3:** dados suficientes nas duas campanhas |
+| A | A3. Indicadores | Validação do reconhecedor por trecho e por indicador; listas e Jaccard | 2–3 meses; horas de especialista são o gargalo | **G4:** erro do indicador aceitável |
+| A | A4. Modelos e escrita | M0–M3, M2b, sensibilidade, M3-S1; relatório e artigo | ~3 meses | **G5:** confirmatório ou exploratório (decisão C) |
+| A-retro | R1. Dados | Receber os dados e auditar os metadados mínimos (seção 7, A-retro) | 2–4 semanas após o acordo | **G2-retro:** coordenadas por ponto, anos ≥ 2018, n de cabrucas |
+| A-retro | R2. Série óptica | Extração com o fluxo do piloto, sem código novo além da leitura dos dados | ~2 semanas | — |
+| A-retro | R3. Modelos | Resposta, M0–M3 e M2b, sensibilidade | 1–2 meses | **G5** |
+| A-retro | R4. Escrita | Relatório técnico e artigo | ~2 meses | Publicação |
+| C | C1. Encerramento | Relatório técnico do piloto e da simulação; arquivamento do código | ~1 mês | Arquivo |
+
+Pela simulação, A-retro e A com 10 a 30 cabrucas produzem uma estimativa exploratória de H2; só um A com bem mais propriedades (≥ 60) chegaria a um resultado de H2 com precisão útil.
 
 ### Caminhos alternativos (decididos em G1)
 
@@ -166,7 +169,7 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 
 - **A — Cabruca (principal):** gravações de parceria ou campanha padronizada.
 - **B — Integralmente aberto:** se uma base brasileira aberta tiver datas, coordenadas e áreas independentes suficientes; título ajustado ao ecossistema amostrado.
-- **C — Metodológico:** se só houver bases com poucos sítios ou rótulos por grupo; estudo de integração e reconhecimento, sem afirmar predição validada de biodiversidade em cabruca.
+- **C — Encerramento (reavaliado em 2026-10-04):** o estudo metodológico de integração com dados abertos que C prometia já foi feito pelo piloto: o fluxo áudio–ponto–data–série óptica funciona de ponta a ponta, com rastreio. Um estudo C não acrescentaria resposta à pergunta. O que o projeto tem de novo para registrar cabe num relatório técnico de encerramento: a divergência de 6% entre o SCL do cubo S2-16D-2 e o da cena de origem (útil a quem usa o cubo), e a simulação de dimensionamento com a comparação de métodos de inferência para ganhos de predição com poucas unidades. Avaliar o BirdNET no WABAD seria o único trabalho novo, mas exige uma dependência nova, fica fora da cabruca e da Bahia e não responde à pergunta. **C equivale a encerrar e arquivar o projeto com esse relatório.**
 - **A-retro — Retrospectivo com pontos de escuta (proposta, 2026-10-04):** se a UESC puder compartilhar os dados de pontos de escuta que já coletou em agroflorestas de cacau, mas não houver campanha nova com gravadores. Detalhado abaixo.
 
 #### Caminho A-retro
@@ -206,8 +209,9 @@ Também é preciso registrar a licença ou o acordo de uso: coordenadas de propr
 
 | Risco | Impacto | Mitigação |
 |---|---|---|
-| Sem acesso a propriedades ou parceria | Inviabiliza o caminho A | Caminhos B ou C decididos em G1 |
-| Poucas áreas independentes | Validação fraca | Simulação de poder; reportar como exploratório |
+| Sem acesso a propriedades ou parceria | Inviabiliza o caminho A | A-retro, ou encerramento (C) em G1 |
+| Poucas áreas independentes | Com 10–30 cabrucas, o IC90 do ganho de H2 tem largura de 0,4 a 1,0 | H2 reportada como estimativa exploratória com intervalo e teste de permutação; simulação refeita com os valores do piloto |
+| Óptico saturado em dossel fechado (NDVI 0,83–0,87 no piloto) | Pouca informação temporal a ganhar | NDMI na mediana; M3-S1 (Sentinel-1) como análise secundária |
 | Nuvens e observações escassas | Séries incompletas | Máscaras de qualidade, registro de observações válidas, Landsat complementar |
 | Erro do reconhecedor | Indicadores enviesados | Validação por especialista, limiares calibrados fora do teste |
 | Confusão entre manejo, distância da mata e equipamento | Associações espúrias | Seleção balanceada de áreas, equipamento padronizado |
@@ -222,6 +226,7 @@ Também é preciso registrar a licença ou o acordo de uso: coordenadas de propr
 - Resposta da UESC ao contato enviado em 2026-10-04 (grupo de ecologia de aves que já amostrou agroflorestas de cacau no sul da Bahia com pontos de escuta; ver `docs/literatura/bases-acusticas-mata-atlantica.md`): parceria para campanha (A), compartilhamento dos dados de pontos de escuta (A-retro) ou nenhuma (C). Prazo: 2026-12-02.
 - Se A-retro: anos das campanhas (antes de 2018 não há janela completa no S2-16D-2), condições de uso dos dados e se houve matas de referência com o mesmo protocolo.
 - Mapa de cobertura validado para as métricas de paisagem (externo ou classificação própria).
+- Intervalo de H2: básico (atual) ou percentil da reamostragem com reajuste (`docs/simulacao-dimensionamento.md`).
 - Orçamento (equipamentos, deslocamento, horas de anotação, armazenamento) — não há preços cotados.
 - Fontes de apoio para a coleta em campo (equipamentos emprestados, parcerias, pequenos financiamentos).
 
