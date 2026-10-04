@@ -11,7 +11,7 @@ as composições de 2022 e conta o pixel central válido por duas regras: a
 usada no teste original (SCL do cubo + B02 <= 0,10) e a regra principal da
 decisão D (SCL da cena de origem). Grava em data/processed/nebulosidade/
 (fora do git) a tabela por ponto × composição, o resumo e um manifesto.
-Precisa de internet; leva cerca de 15 a 30 minutos.
+Precisa de internet; roda um ponto por vez e leva cerca de 30 a 60 minutos.
 """
 
 from __future__ import annotations
@@ -19,13 +19,14 @@ from __future__ import annotations
 import argparse
 import json
 import platform
-from concurrent.futures import ThreadPoolExecutor
+import time
 from datetime import date, datetime, timezone
 from importlib.metadata import version
 from pathlib import Path
 
 import pandas as pd
 from pystac_client import Client
+from pystac_client.exceptions import APIError
 from rasterio.warp import transform
 
 from satbio import acustica, rastreio, stac
@@ -38,6 +39,7 @@ CENTROS = {"Una": (484973, 8325906), "Ilhéus": (473698, 8373196)}
 CRS_CENTROS = "EPSG:29194"
 PASSO_M = 2000
 DESLOCAMENTOS = [(dx * PASSO_M, dy * PASSO_M) for dy in (-0.5, 0.5) for dx in (-2, -1, 0, 1, 2)]
+TENTATIVAS = 4  # o catálogo do INPE responde 429 quando recebe consultas demais
 REGRAS = {"valido_scl_cubo_b02": "SCL do cubo + B02 (regra do teste original)",
           "valido": "SCL da cena de origem + B02 (decisão D)"}
 
@@ -66,6 +68,19 @@ def serie_do_ponto(p: dict) -> list[dict]:
     return linhas
 
 
+def serie_com_novas_tentativas(p: dict) -> list[dict]:
+    """Refaz o ponto inteiro se o catálogo limitar as consultas (HTTP 429), com espera crescente."""
+    for tentativa in range(1, TENTATIVAS + 1):
+        try:
+            return serie_do_ponto(p)
+        except APIError as erro:
+            if "429" not in str(erro) or tentativa == TENTATIVAS:
+                raise
+            print(f"{p['ponto']}: limite de consultas do catálogo; nova tentativa em {60 * tentativa} s", flush=True)
+            time.sleep(60 * tentativa)
+    raise AssertionError("inalcançável")
+
+
 def cobertura(grupo: pd.DataFrame, regra: str) -> pd.Series:
     """Regra de cobertura do desenho (seção 6), aplicada ao pixel central: >= 10 válidas e >= 1 por trimestre."""
     validas = grupo[grupo[regra]]
@@ -78,8 +93,8 @@ def main(permitir_sujo: bool) -> None:
     codigo = rastreio.estado_do_codigo(RAIZ, SAIDA, permitir_sujo)
     acesso = datetime.now(timezone.utc).isoformat(timespec="seconds")
     tabela_pontos = pontos()
-    with ThreadPoolExecutor(max_workers=4) as ex:
-        partes = list(ex.map(serie_do_ponto, tabela_pontos.to_dict("records")))
+    # Um ponto por vez: em paralelo, o catálogo do INPE limita as consultas.
+    partes = [serie_com_novas_tentativas(p) for p in tabela_pontos.to_dict("records")]
     serie = pd.DataFrame([l for parte in partes for l in parte])
     serie["trimestre"] = pd.to_datetime(serie["inicio_composicao"]).dt.quarter
 
