@@ -36,7 +36,7 @@ Escolhida A1, pela escala do projeto. A afirmação do estudo é "o satélite pr
 
 - A unidade independente é a **propriedade de cabruca**. Pontos, dias e minutos são subamostras; duas campanhas na mesma propriedade não dobram o n.
 - As **matas de referência não entram na avaliação principal.** A avaliação principal é **entre cabrucas retidas**, porque o objetivo é distinguir cabrucas em condições diferentes, não separar mata de cabruca. Uma análise com todos os ambientes pode ser complementar e é reportada como tal.
-- **Decisão C — número viável de cabrucas [aberta].** As 24–36 áreas do PRD incluem as matas. O número de cabrucas e de matas depende da parceria (UESC) e define o que a avaliação consegue detectar (seção 9).
+- **Decisão C — número viável de cabrucas [aberta].** As 24–36 áreas do PRD incluem as matas. O número de cabrucas e de matas depende da parceria (UESC) e define a precisão de H2 (seção 9): pela [simulação](simulacao-dimensionamento.md), com 10 a 30 cabrucas o IC90 do ganho tem largura de 0,4 a 1,0 e H2 fica exploratória; ~60 cabrucas são o mínimo para ver um ganho de ~20%, e 85 a 95 para precisão de ±0,10.
 
 ## 4. Hipóteses e comparações
 
@@ -128,10 +128,10 @@ Um preditor útil pode estar funcionando como substituto de outro fator; desempe
 |---|---|---|---|
 | A | Comunidade detectada ou ocupação | Escala e esforço possíveis | **Fechada:** A1, comunidade detectada |
 | B | Referência independente ou construída no treino | Acesso a matas com o mesmo protocolo | B1, se a parceria permitir |
-| C | Número de cabrucas e de matas | Parceria (UESC), recursos, simulação | Fechar após a simulação |
+| C | Número de cabrucas e de matas | Parceria (UESC), recursos, simulação | Com 10–30 cabrucas, H2 é exploratória; ~60 para ver ~20%, 85–95 para ±0,10 (simulação de 2026-10-04). Fechar com o número que a parceria oferecer |
 | D | Regra de validade do pixel | Custo da consulta à cena de origem | **Fechada:** SCL da cena de origem + B02 ≤ 0,10 |
 | E | Ganho mínimo relevante | Julgamento ecológico | **Fechada:** 10% do MAE do modelo de base de cada comparação; desde 2026-10-04, regra de interpretação do intervalo (seção 4) |
-| — | Inferência e estimando de H2 | Simulação | **Fechado em 2026-10-04:** ganho alcançável com o n do estudo; reamostragem de propriedades com reajuste, intervalo básico |
+| — | Inferência e estimando de H2 | Simulação | **Fechado em 2026-10-04:** ganho alcançável com o n do estudo; reamostragem de propriedades com reajuste. Aberto: intervalo básico (atual) ou percentil (nunca subcobre com ganho) |
 
 ## Referências desta seção
 
