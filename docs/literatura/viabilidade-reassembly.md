@@ -16,15 +16,17 @@ Detalhes em [`alternativas-a-cabruca.md`](alternativas-a-cabruca.md), verificado
 
 ## Teste de nebulosidade
 
-O Brazil Data Cube não cobre o Equador. Foi usado o catálogo aberto Earth Search (Sentinel-2 L2A, AWS), com 9 pontos cobrindo a área das parcelas, no ano anterior às gravações de 2021 (out/2020 a set/2021), contando as observações com SCL 4, 5 ou 6 (script avulso, não versionado).
+O Brazil Data Cube não cobre o Equador. Foi usado o catálogo aberto Earth Search (Sentinel-2 L2A, AWS), com 9 pontos numa grade 3×3 cobrindo a área das parcelas, no ano anterior às gravações de 2021 (out/2020 a set/2021), contando as observações com SCL 4, 5 ou 6, uma por ponto e data. Script: `scripts/nebulosidade_reassembly.py`; tabela por cena × ponto e manifesto (IDs dos itens, data de acesso, commit) em `data/processed/reassembly_nuvem/`.
 
 | | Canandé (cenas individuais) | Sul da Bahia (cubo de 16 dias, 2022) |
 |---|---|---|
-| Nuvem mediana da cena | 90% | — |
-| Observações limpas no ponto | 8% (mediana de 6 por ano; 3 a 11) | — |
-| Períodos de 16 dias com alguma observação válida | 5 de ~23 (mediana; 2 a 9) | ~12 de 23 (mediana) |
+| Nuvem mediana da cena | 90% (294 cenas, tiles 17NPA e 17NQA) | — |
+| Observações limpas no ponto | 10% (mediana de 7 por ano; 3 a 11) | — |
+| Períodos de 16 dias com alguma observação válida | 5 de 22 (mediana; 3 a 9) | ~12 de 23 (mediana) |
 
-Houve meses sem nenhuma observação limpa nos 9 pontos (maio e agosto de 2021).
+Houve meses sem nenhuma observação limpa nos 9 pontos (dezembro de 2020, maio e agosto de 2021).
+
+**Reprodução (2026-10-04).** O teste original (2026-10-03) foi feito com um script avulso; a versão versionada, rodada em 2026-10-04 (commit `6dc4580`), deu números um pouco diferentes: 10% de observações limpas (antes 8%), mediana de 7 por ponto (antes 6), mínimo de 3 períodos de 16 dias com observação válida (antes 2) e dezembro de 2020 também sem observação limpa. A diferença provável é a grade de pontos e a regra de uma observação por ponto e data, que o script avulso não registrou. A conclusão não muda.
 
 ## Avaliação
 
