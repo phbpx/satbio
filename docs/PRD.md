@@ -3,7 +3,7 @@
 **Projeto:** Predição de indicadores da comunidade de aves em sistemas cabruca por meio de séries temporais de sensoriamento remoto e monitoramento acústico passivo
 **Tipo:** Pesquisa independente e voluntária, em ciência aberta · cronograma de referência de 24 meses
 **Fonte:** `docs/pre-projeto-bioacustica-inpe.pdf` (pré-projeto de 2 de outubro de 2026)
-**Status:** piloto concluído em 2026-10-03 (ver `docs/piloto/semana-4.md`); G1 aprovado de forma condicional: caminho A se a parceria for confirmada até 2026-12-02, senão caminho C
+**Status:** piloto concluído em 2026-10-03 (ver `docs/piloto/semana-4.md`); G1 aprovado de forma condicional: caminho A (ou A-retro) se a parceria for confirmada até 2026-12-02, senão caminho C. Contato com a UESC enviado em 2026-10-04, sem resposta até agora
 
 ---
 
@@ -160,11 +160,39 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 
 > **Decisão do G1 (2026-10-03):** B descartado, porque nenhuma base aberta auditada tem gravações de aves em cabruca ou no sul da Bahia. A é o caminho principal, condicional à confirmação de parceria (UESC ou equivalente) até **2026-12-02**; sem parceria até lá, o projeto segue pelo caminho C. Evidência em `docs/piloto/semana-4.md` e `docs/bases/README.md`.
 
+> **Parceria (2026-10-04):** o contato com o grupo de ecologia de aves da UESC foi enviado em 2026-10-04. O prazo do G1 (**2026-12-02**) não muda: até lá, a resposta define entre A (campanha com gravadores), A-retro (dados de pontos de escuta já coletados) e C.
+
 > **Foco do projeto (2026-10-03):** o interesse central é a pergunta (quanto séries temporais de satélite acrescentam à predição de aves medidas por gravação em sistemas com dossel parecido e manejo diferente abaixo dele), não a cabruca em si. A cabruca segue como alvo até o G1. Se houver pivô, a nova região ou sistema é escolhido onde houver parceiro e dados que atendam à pergunta (≥ ~30 áreas independentes com coordenadas e protocolo padronizado, gradiente de condição sob dossel parecido, Sentinel-2 utilizável). Alternativas mapeadas em `docs/literatura/alternativas-a-cabruca.md`.
 
 - **A — Cabruca (principal):** gravações de parceria ou campanha padronizada.
 - **B — Integralmente aberto:** se uma base brasileira aberta tiver datas, coordenadas e áreas independentes suficientes; título ajustado ao ecossistema amostrado.
 - **C — Metodológico:** se só houver bases com poucos sítios ou rótulos por grupo; estudo de integração e reconhecimento, sem afirmar predição validada de biodiversidade em cabruca.
+- **A-retro — Retrospectivo com pontos de escuta (proposta, 2026-10-04):** se a UESC puder compartilhar os dados de pontos de escuta que já coletou em agroflorestas de cacau, mas não houver campanha nova com gravadores. Detalhado abaixo.
+
+#### Caminho A-retro
+
+Estudo retrospectivo sobre os dados que o grupo da UESC já coletou (ex.: Oliveira *et al.* 2026, 10 agroflorestas; ver `docs/literatura/bases-acusticas-mata-atlantica.md`), sem campanha nova e sem áudio.
+
+**O que muda**
+- **Resposta:** a lista de espécies do ponto de escuta (observador em campo) por propriedade × campanha, e não a lista de detecções do PAM. A decisão A1 do desenho vira "comunidade detectada sob o protocolo de pontos de escuta do estudo original"; efeitos de observador entram na resposta e são discutidos, não corrigidos.
+- **Reconhecedor fora do escopo:** RF3, RF4, o objetivo específico 3 e a validação por trecho e por indicador (desenho analítico, seção 7) não se aplicam. O erro de identificação é o do observador e não é estimável por nós.
+- **Esforço e protocolo são os do estudo original** (duração e raio das contagens, pontos por propriedade, visitas, horários). A padronização do esforço da resposta usa o que foi feito, não o protocolo da seção 5.3; o número de cabrucas também é o do estudo, e a simulação de dimensionamento diz que precisão esperar dele.
+- **Janela óptica:** termina na véspera da primeira contagem de cada propriedade × campanha. O S2-16D-2 começa em 2017-01-01, então campanhas antes de 2018 só teriam Landsat (30 m, com harmonização) ou janela menor que 12 meses.
+- **Referência ecológica (decisão B):** só existe se o estudo original amostrou matas com o mesmo protocolo; senão, o indicador principal precisa ser revisto (ex.: só especialistas florestais).
+
+**O que se mantém:** a pergunta do satélite; os modelos M0–M3 e o controle M2b; a validação por propriedade; as regras ópticas (corte na véspera, decisão D, cobertura mínima); H2 como estimação do ganho; e o indicador secundário de especialistas florestais.
+
+**Metadados mínimos a receber** (critérios da seção 5.2):
+
+| Critério da seção 5.2 | O que precisamos |
+|---|---|
+| Coordenadas compatíveis com a escala | Coordenada de cada ponto de escuta (não só da propriedade), com datum e precisão do GPS |
+| Datas com horário e fuso | Data e hora de início de cada contagem |
+| Identidade dos pontos, períodos, esforço e equipamento | ID de propriedade de cada ponto e se propriedades vizinhas têm o mesmo dono; pontos por propriedade; duração e raio da contagem; número de visitas e campanhas |
+| Áreas independentes com variação útil | Tipo de área (cabruca ou mata de referência) e as variáveis de manejo medidas em campo (densidade de sombra, abertura de dossel), se houver |
+| Rótulos que permitam interpretar detecções e ausências | Lista espécie × ponto × visita (não só totais por propriedade); protocolo de registro (auditivo e visual), observadores e tratamento de espécies não identificadas |
+
+Também é preciso registrar a licença ou o acordo de uso: coordenadas de propriedades ficam fora do git, como no caminho A.
 
 ## 8. Critérios de sucesso
 
@@ -191,7 +219,8 @@ Python para STAC, rasters e modelos; R para estatística ecológica quando útil
 - Colaboradores: apoio em sensoriamento remoto e em ecologia de aves (amostragem e validação taxonômica).
 - Municípios e propriedades com acesso confirmado.
 - Licença efetiva do WABAD (CC BY ou CC BY-NC) e do AnuraSet (CC BY ou CC0); fuso dos horários do WABAD e do Soundscape_CCM1.
-- Parceria com o grupo de ecologia de aves da UESC, que já amostrou agroflorestas de cacau no sul da Bahia com pontos de escuta (ver `docs/literatura/bases-acusticas-mata-atlantica.md`).
+- Resposta da UESC ao contato enviado em 2026-10-04 (grupo de ecologia de aves que já amostrou agroflorestas de cacau no sul da Bahia com pontos de escuta; ver `docs/literatura/bases-acusticas-mata-atlantica.md`): parceria para campanha (A), compartilhamento dos dados de pontos de escuta (A-retro) ou nenhuma (C). Prazo: 2026-12-02.
+- Se A-retro: anos das campanhas (antes de 2018 não há janela completa no S2-16D-2), condições de uso dos dados e se houve matas de referência com o mesmo protocolo.
 - Mapa de cobertura validado para as métricas de paisagem (externo ou classificação própria).
 - Orçamento (equipamentos, deslocamento, horas de anotação, armazenamento) — não há preços cotados.
 - Fontes de apoio para a coleta em campo (equipamentos emprestados, parcerias, pequenos financiamentos).

@@ -58,7 +58,7 @@ A tabela junta, por sítio × campanha, o resumo acústico e os descritores ópt
 **Evidência do piloto:**
 
 - Nenhuma das quatro bases abertas auditadas tem gravações de aves em cabruca ou no sul da Bahia, e nenhuma tem áreas independentes com coordenadas por ponto em número próximo ao necessário.
-- O grupo de ecologia de aves da UESC (Morante-Filho, Faria e colaboradores) já amostrou aves com pontos de escuta em 10 a 30 agroflorestas de cacau no sul da Bahia. É o parceiro mais provável para propriedades e validação taxonômica. O contato ainda não foi feito: o e-mail está em rascunho.
+- O grupo de ecologia de aves da UESC (Morante-Filho, Faria e colaboradores) já amostrou aves com pontos de escuta em 10 a 30 agroflorestas de cacau no sul da Bahia. É o parceiro mais provável para propriedades e validação taxonômica. O contato foi enviado em 2026-10-04 (atualização posterior ao portão).
 - O fluxo técnico funciona de ponta a ponta com dados abertos: vínculo áudio–ponto–data, série óptica sem vazamento, máscara conferida contra as cenas de origem e tabela analítica com rastreabilidade completa.
 
 **Decisão (aprovada em 2026-10-03):**
@@ -68,6 +68,8 @@ A tabela junta, por sítio × campanha, o resumo acústico e os descritores ópt
 3. **Caminho C como alternativa com prazo.** Se não houver parceria confirmada até **2026-12-02**, o projeto segue como estudo metodológico de integração com dados abertos, e o título e as afirmações mudam para refletir isso.
 
 As decisões B (referência) e C (número de cabrucas) do desenho analítico dependem da mesma conversa com a UESC.
+
+**Atualização (2026-10-04):** o contato com a UESC foi enviado; o prazo de 2026-12-02 continua valendo. Foi acrescentado ao PRD (seção 7) o caminho A-retro: estudo retrospectivo com os pontos de escuta que a UESC já coletou, sem campanha nova nem áudio.
 
 ## Encerramento do piloto
 
