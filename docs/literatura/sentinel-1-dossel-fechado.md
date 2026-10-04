@@ -52,7 +52,7 @@ Vale como **análise secundária**, não como substituto do óptico na análise 
 - A vantagem que se pode esperar com segurança é a **ausência de lacunas por nuvem**, não uma sensibilidade maior à estrutura: a evidência em cacau é de sensibilidade fraca a moderada, e a banda C também satura.
 - A pergunta do satbio é sobre séries do INPE; o RTC do BDC só cobre 2025 em diante. Para uma campanha nova (caminho A) ele serve; para o A-retro seria preciso o Planetary Computer.
 - No [desenho analítico](../desenho-analitico.md) entra como M3-S1 (seção 9), fixado antes dos dados e reportado como secundário.
-- Na [simulação de dimensionamento](../simulacao-dimensionamento.md) entra como cenário: um descritor de dinâmica sem lacunas ópticas e com menos ruído que o óptico degradado. O nível de ruído é suposição, não medida.
+- Na [simulação de dimensionamento](../simulacao-dimensionamento.md) entrou como cenário no mundo pessimista: um descritor de dinâmica sem lacunas e com ruído 0,4, contra o óptico com ruído 0,7 e as lacunas observadas. O ganho de população passa de 5% para 10%; com 60 cabrucas, a permutação detecta o ganho em 86% das repetições (58% com o óptico). A largura do intervalo quase não muda (0,38 com 30 cabrucas). O ruído do radar é suposição, e a simulação supõe que o radar veja a mesma dinâmica que o óptico, o que não está demonstrado.
 
 ## Referências
 

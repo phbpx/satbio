@@ -110,6 +110,15 @@ Sem ganho, a permutação rejeita de 3% a 8% das vezes (nominal 5%), e o IC fica
 | Referência B2 | 22% | 0,43 | 50% | 91% | 87% |
 | Todas | 13% | 0,39 | 23% | 60% | 90% |
 
+**Braço Sentinel-1** ([nota](literatura/sentinel-1-dossel-fechado.md)), no mundo pessimista com o sinal temporal do cenário de ~10% (rodada do commit `bdcd619`, que reproduz as células acima com as mesmas sementes). O descritor óptico tem ruído realista e as lacunas observadas; o de radar não tem lacunas e tem menos ruído, por suposição:
+
+| Descritor de dinâmica | Cabrucas | Ganho de população | Largura do IC90 | IC acima de zero | Permutação |
+|---|---|---|---|---|---|
+| Óptico realista (ruído 0,7, lacunas) | 30 / 60 | 5% / 5% | 0,33 / 0,19 | 10% / 16% | 30% / 58% |
+| Radar (ruído 0,4, sem lacunas) | 30 / 60 | 10% / 10% | 0,38 / 0,22 | 14% / 33% | 52% / 86% |
+
+Se o radar de fato vir a mesma dinâmica com menos ruído, o ganho disponível dobra, mas a precisão continua presa ao número de cabrucas: com 30, o intervalo ainda tem ±0,19.
+
 ## O que isso quer dizer
 
 - **A precisão depende quase só do número de cabrucas.** A largura do IC90 é de 0,8 a 1,05 com 10 cabrucas, ~0,55 com 20, ~0,40 com 30, ~0,25 com 60 e ~0,16 com 120, nos dois mundos. As suposições pessimistas não alargam o intervalo: elas **encolhem o ganho** que há para estimar.
