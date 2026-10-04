@@ -5,8 +5,11 @@ Uso:
 
 Cruza 10, 20 e 30 cabrucas com cenários calibrados pelo ganho verdadeiro de M3
 sobre M2b (0%, 10%, 15% e 20% do MAE, medidos na mesma comunidade com uma
-amostra grande) e grava em data/processed/simulacao/ (fora do git) as
-repetições, o resumo e um manifesto; a figura vai para docs/img/.
+amostra grande). Em cada repetição calcula o intervalo do ganho por três
+métodos e o teste de permutação, e mede a cobertura de cada intervalo contra
+o ganho de população e contra o ganho alcançável com o n do estudo. Grava em
+data/processed/simulacao/ (fora do git) as repetições, o resumo e um
+manifesto; a figura (classificação pelo método adotado) vai para docs/img/.
 Os resultados dependem das suposições de satbio.simulacao.Cenario.
 """
 
@@ -15,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import platform
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import asdict
 from datetime import datetime, timezone
 from importlib.metadata import version
@@ -24,6 +28,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from satbio import acustica, rastreio, simulacao  # noqa: E402
@@ -78,30 +83,53 @@ def figura(resumo: pd.DataFrame) -> None:
     plt.close(fig)
 
 
+def _celula(args: tuple[int, int, str, float, float, int]) -> pd.DataFrame:
+    i, n, rotulo, sinal, ruido, repeticoes = args
+    c = Cenario(n_cabrucas=n, sinal_temporal=sinal, ruido_dinamica=ruido)
+    return simulacao.rodar(c, repeticoes, SEMENTE + 100 * (i // len(CENARIOS)) + i % len(CENARIOS)).assign(
+        cenario=rotulo)
+
+
+def resumir(todas: pd.DataFrame) -> pd.DataFrame:
+    g = todas.groupby(["n_cabrucas", "cenario"], sort=False)
+    resumo = g.agg(ganho_verdadeiro_medio=("ganho_verdadeiro", "mean"),
+                   ganho_verdadeiro_mse_medio=("ganho_verdadeiro_mse", "mean"),
+                   ganho_alcancavel_medio=("ganho_alcancavel", "mean"),
+                   ganho_estimado_medio=("ganho_m3_m2b", "mean"),
+                   ganho_estimado_dp=("ganho_m3_m2b", "std"),
+                   ic_inferior_acima_de_zero=("ic_inferior", lambda s: (s > 0).mean()),
+                   rejeicao_permutacao_5pct=("p_permutacao", lambda p: (p <= 0.05).mean()),
+                   mae_m2b_mediano=("mae_M2b", "median"))
+    chave = [todas["n_cabrucas"], todas["cenario"]]
+    for m in simulacao.METODOS:
+        centro = (todas[f"ic_superior_{m}"] + todas[f"ic_inferior_{m}"]) / 2
+        resumo[f"vies_centro_{m}"] = (centro - todas["ganho_alcancavel"]).groupby(chave, sort=False).mean()
+        resumo[f"cobertura_alcancavel_{m}"] = g[f"cobre_alcancavel_{m}"].mean()
+        resumo[f"cobertura_populacao_{m}"] = g[f"cobre_populacao_{m}"].mean()
+        resumo[f"largura_mediana_{m}"] = (todas[f"ic_superior_{m}"] - todas[f"ic_inferior_{m}"]).groupby(
+            [todas["n_cabrucas"], todas["cenario"]], sort=False).median()
+    # erro de Monte Carlo da cobertura (binomial), igual para todos os métodos de uma célula
+    resumo["ep_cobertura"] = np.sqrt(0.9 * 0.1 / g.size())
+    return (resumo.join(pd.crosstab([todas["n_cabrucas"], todas["cenario"]], todas["resultado"], normalize="index")
+                        .reindex(columns=RESULTADOS, fill_value=0.0))
+            .reset_index())
+
+
 def main(repeticoes: int, permitir_sujo: bool) -> None:
     codigo = rastreio.estado_do_codigo(RAIZ, SAIDA, permitir_sujo)
-    partes = []
-    for i, n in enumerate(N_CABRUCAS):
-        for j, (rotulo, (sinal, ruido)) in enumerate(CENARIOS.items()):
-            c = Cenario(n_cabrucas=n, sinal_temporal=sinal, ruido_dinamica=ruido)
-            res = simulacao.rodar(c, repeticoes, SEMENTE + 100 * i + j).assign(cenario=rotulo)
-            partes.append(res)
-            print(f"n={n:2d} {rotulo:11s} real={res['ganho_verdadeiro'].mean():.3f} "
-                  f"cobertura={res['ic_cobre_verdadeiro'].mean():.0%}: " + ", ".join(
-                      f"{k} {v:.0%}" for k, v in res["resultado"].value_counts(normalize=True).items()))
+    tarefas = [(i * len(CENARIOS) + j, n, rotulo, sinal, ruido, repeticoes)
+               for i, n in enumerate(N_CABRUCAS) for j, (rotulo, (sinal, ruido)) in enumerate(CENARIOS.items())]
+    with ProcessPoolExecutor() as ex:
+        partes = list(ex.map(_celula, tarefas))
+    for res in partes:
+        print(f"n={res['n_cabrucas'].iloc[0]:2d} {res['cenario'].iloc[0]:11s} "
+              f"real={res['ganho_verdadeiro'].mean():.3f} alcançável={res['ganho_alcancavel'].mean():.3f} "
+              + " ".join(f"{m}={res[f'cobre_alcancavel_{m}'].mean():.0%}" for m in simulacao.METODOS))
     todas = pd.concat(partes, ignore_index=True)
     todas["largura_ic"] = todas["ic_superior"] - todas["ic_inferior"]
-    resumo = (todas.groupby(["n_cabrucas", "cenario"], sort=False)
-              .agg(ganho_verdadeiro_medio=("ganho_verdadeiro", "mean"),
-                   ganho_verdadeiro_mse_medio=("ganho_verdadeiro_mse", "mean"),
-                   ganho_estimado_mediano=("ganho_m3_m2b", "median"),
-                   largura_ic_mediana=("largura_ic", "median"),
-                   cobertura_ic90=("ic_cobre_verdadeiro", "mean"),
-                   ic_inferior_acima_de_zero=("ic_inferior", lambda s: (s > 0).mean()),
-                   mae_m2b_mediano=("mae_M2b", "median"))
-              .join(pd.crosstab([todas["n_cabrucas"], todas["cenario"]], todas["resultado"], normalize="index")
-                    .reindex(columns=RESULTADOS, fill_value=0.0))
-              .reset_index())
+    resumo = resumir(todas)
+    print("\ncobertura geral do IC90 contra o ganho alcançável: " + ", ".join(
+        f"{m} {todas[f'cobre_alcancavel_{m}'].mean():.1%}" for m in simulacao.METODOS))
 
     SAIDA.mkdir(parents=True, exist_ok=True)
     todas.to_csv(SAIDA / "repeticoes.csv", index=False)
@@ -116,7 +144,12 @@ def main(repeticoes: int, permitir_sujo: bool) -> None:
         "cenario_base": {k: (list(v) if isinstance(v, tuple) else v) for k, v in asdict(Cenario(n_cabrucas=0)).items()},
         "grade": {"n_cabrucas": N_CABRUCAS, "cenarios": {k: {"sinal_temporal": v[0], "ruido_dinamica": v[1]}
                                                          for k, v in CENARIOS.items()}},
-        "ganho_verdadeiro": "mesma comunidade, ajuste em 4000 propriedades e erro em outras 4000",
+        "ganho_verdadeiro": "mesma comunidade e referência, ajuste em 4000 propriedades e erro em outras 4000",
+        "ganho_alcancavel": "mesma comunidade, 100 ajustes com n_cabrucas propriedades, erro nas mesmas 4000",
+        "metodos_intervalo": simulacao.METODOS,
+        "metodo_adotado": simulacao.METODO_ADOTADO,
+        "nivel_ic": simulacao.NIVEL,
+        "parametros_metodos": {"reajuste_n_boot": 200, "cv_k": 5, "cv_repeticoes": 20, "permutacoes": 199},
         "ganho_minimo": simulacao.GANHO_MINIMO,
         "saidas_sha256": {f: acustica.sha256(SAIDA / f) for f in ["repeticoes.csv", "resumo.csv"]},
     }
