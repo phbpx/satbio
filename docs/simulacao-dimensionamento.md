@@ -133,7 +133,7 @@ Se o radar de fato vir a mesma dinâmica com menos ruído, o ganho disponível d
 
 ## Limites
 
-Os números valem para as suposições acima, que não foram medidas em cabruca: frações de sinal, detectabilidade, erro do reconhecedor, ruído dos descritores, condição das matas, correlação dossel–dinâmica e força da vizinhança. As lacunas vêm de um único ano (2022) e de pontos que não são necessariamente cabrucas. A simulação usa uma campanha por cabruca e ridge com λ fixo, e o descritor de dinâmica é uma variável só (no desenho são dois, amplitude e mudança). O ganho alcançável foi estimado com 100 ajustes por repetição; o erro de Monte Carlo das coberturas é de ±1,3 ponto por célula.
+Os números valem para as suposições acima, que não foram medidas em cabruca: frações de sinal, detectabilidade, erro do reconhecedor, ruído dos descritores, condição das matas, correlação dossel–dinâmica e força da vizinhança. As lacunas vêm de um único ano (2022), de pontos que não são necessariamente cabrucas e do teste original; a [reprodução com script versionado](literatura/nebulosidade-sul-bahia.md) dá ~0% sem dinâmica e ~38% com dinâmica degradada, em vez de 5% e 25% (efeito pequeno, pela sensibilidade). A simulação usa uma campanha por cabruca e ridge com λ fixo, e o descritor de dinâmica é uma variável só (no desenho são dois, amplitude e mudança). O ganho alcançável foi estimado com 100 ajustes por repetição; o erro de Monte Carlo das coberturas é de ±1,3 ponto por célula.
 
 ## Decisões que isto fecha ou levanta
 
