@@ -117,6 +117,7 @@ Um preditor útil pode estar funcionando como substituto de outro fator; desempe
 ## 9. Análise principal e dimensionamento
 
 - **Uma análise principal simples:** regressão linear regularizada com os descritores da seção 5, validação deixando uma propriedade de fora (ou grupos de propriedades vizinhas, se houver dependência espacial entre elas). Random Forest e modelos aditivos entram como análises secundárias, reportadas como tal.
+- **Análise secundária com Sentinel-1 (M3-S1) [proposta em 2026-10-04].** M2b mais descritores de radar de banda C (mediana anual de γ⁰ VH, razão VH/VV e anomalia de VH em relação ao mesmo período de anos anteriores), comparado com M2b da mesma forma que M3. Os descritores ficam fixados antes dos dados; o M3-S1 não substitui o M3 na análise principal e o resultado do teste não escolhe entre óptico e radar. Só entra se houver série RTC na mesma órbita cobrindo a janela de 12 meses (no BDC, a coleção `sentinel-1-rtc-1` começa em 2025). Motivo, descritores e rastreio em [`docs/literatura/sentinel-1-dossel-fechado.md`](literatura/sentinel-1-dossel-fechado.md).
 - Nenhuma escolha (índices, escalas, janelas, hiperparâmetros) é feita com as propriedades retidas.
 - **A validação corresponde à aplicação:** prever uma propriedade nova da mesma região. Transferência para outra paisagem ou para outro ano não é testada pelo desenho e não será afirmada.
 - **Intervalo do ganho** pela reamostragem de propriedades com reajuste (intervalo básico, seção 4), com as réplicas sorteando os mesmos grupos usados na validação.

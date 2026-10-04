@@ -13,7 +13,9 @@ população de M3 sobre M2b, cruzadas com 10 a 120 cabrucas:
   vizinhas com resíduo e paisagem em comum e referência B2.
 
 Também roda uma análise de sensibilidade com 30 cabrucas, ligando cada
-suposição pessimista isoladamente no cenário otimista de ~20%. Em cada
+suposição pessimista isoladamente no cenário otimista de ~20%, e o braço
+Sentinel-1: descritor de dinâmica óptico realista contra um de radar, sem
+lacunas e com menos ruído (suposição), no mundo pessimista. Em cada
 repetição calcula o intervalo do ganho pelos quatro métodos e o teste de
 permutação, e mede a cobertura contra o ganho de população e o alcançável.
 Grava em data/processed/simulacao/ (fora do git) as repetições, o resumo e um
@@ -71,6 +73,13 @@ SENSIBILIDADE = {"dinâmica correlacionada com o dossel": ["correlacao_estavel_d
                  "vizinhos dependentes": ["tamanho_vizinhanca", "correlacao_vizinhos"],
                  "referência B2": ["referencia"],
                  "todas": list(PESSIMISTA)}
+# Braço Sentinel-1 (docs/literatura/sentinel-1-dossel-fechado.md), no mundo pessimista com o mesmo sinal
+# temporal do cenário de ~10%: descritor óptico com ruído realista e lacunas, contra um descritor de radar
+# sem lacunas por nuvem e com menos ruído no dossel saturado. O ruído do radar é suposição.
+SENTINEL1_N = [30, 60]
+SENTINEL1 = {"óptico realista (ruído 0,7, lacunas)": {"ruido_dinamica": 0.7},
+             "radar (ruído 0,4, sem lacunas)": {"ruido_dinamica": 0.4, "frac_sem_dinamica": 0.0,
+                                                "frac_dinamica_degradada": 0.0}}
 RESULTADOS = simulacao.CATEGORIAS
 CORES = ["#2a78d6", "#eb6834", "#1baf7a"]  # validadas (scripts/validate_palette.js da skill de visualização)
 
@@ -86,6 +95,10 @@ def tarefas() -> list[dict]:
     for rotulo, campos in SENSIBILIDADE.items():
         lista.append({"bloco": "sensibilidade", "estrutura": rotulo, "cenario": "ganho ~20% (otimista)",
                       "cenario_obj": replace(base, **{k: PESSIMISTA[k] for k in campos})})
+    for rotulo, params in SENTINEL1.items():
+        for n in SENTINEL1_N:
+            lista.append({"bloco": "sentinel-1", "estrutura": rotulo, "cenario": "pessimista, sinal temporal 0,30",
+                          "cenario_obj": Cenario(n_cabrucas=n, **{**PESSIMISTA, "sinal_temporal": 0.30, **params})})
     for i, t in enumerate(lista):
         t["semente"] = SEMENTE + i
     return lista
@@ -203,6 +216,7 @@ def main(repeticoes: int, permitir_sujo: bool) -> None:
         "n_cabrucas": N_CABRUCAS,
         "estruturas": {k: {"suposicoes": v[0], "cenarios": v[1]} for k, v in ESTRUTURAS.items()},
         "sensibilidade": {"n_cabrucas": SENSIBILIDADE_N, "base": "otimista, ganho ~20%", "fatores": SENSIBILIDADE},
+        "sentinel1": {"n_cabrucas": SENTINEL1_N, "base": "pessimista, sinal temporal 0,30", "descritores": SENTINEL1},
         "ganho_verdadeiro": "mesma comunidade e referência, ajuste em 4000 propriedades e erro em outras 4000",
         "ganho_alcancavel": "mesma comunidade, 100 ajustes com n_cabrucas propriedades, erro nas mesmas 4000",
         "metodos_intervalo": simulacao.METODOS,
